@@ -1,0 +1,23 @@
+{
+  "name": "annograms",
+  "version": "0.1",
+  "author": "Daniel C. Howe",
+  "description": "annograms",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dhowe/annograms.git"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "main": "node -r esm index.js",
+    "test": "mocha -r esm"
+  },
+  "devDependencies": {
+    "esm": "^3.2.25",
+    "mocha": "^9.1.3",
+    "line-reader": "^0.4.0"
+  },
+  "dependencies": {
+    "rita": "^2.6.1"
+  }
+}
