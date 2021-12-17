@@ -1,4 +1,5 @@
-let RiTa = require('../ritajs/src/rita').default; // src
+import RiTa from 'rita';
+
 let lb = '<p>';
 class MetaMarkov {
 

@@ -1,38 +1,11 @@
-//let RiTa = require('rita'); // npm
-//let RiTa = require('../ritajs/src/rita').default; // src
-//let MetaMarkov = require('./meta-markov').default;
-
-import RiTa from '../ritajs/src/rita';
+import RiTa from 'rita';//'../ritajs/src/rita';
 import MetaMarkov from './meta-markov';
 
-//////////////////////////////////////////////////////////////////////
-
-let poems = [].concat(
-  require('./data/Penguin_Prose_Poems.json'),
-  require('./data/Great_American_Prose_Poems.json'),
-  require('./data/Short_An_International_Anthology.json')
-).map((p, i) => {
-
-  let text = p.text
-    .replace(/[”“()]/g, '')
-    .replace(/((\r?\n)|<p>|[\s])+/g, ' ')
-    .replace(/(^[`‘’']|[`‘’']\s|\s[`‘’'])/g, ' ')
-    .replace(/[`‘’']([!?.])$/, '$1')
-    .replace(/!/, '.')
-    .replace(/:/, ',');
-
-  //let minSentenceLength = 7;
-  let sents = RiTa.sentences(text);
-  sents.map(s => {
-    let words = RiTa.tokenize(s);
-    words.map(w => w.startsWith('I') ? w : w.toLowerCase());
-    return RiTa.capitalize(RiTa.untokenize(words));
-  });
-  p.id = i;
-  p.text = sents.join(' ');
-  return p;
-});
-
+let poems = loadPoems();
+let mm = new MetaMarkov(4, poems, { maxLengthMatch: 7, trace: 0 });
+let poem = mm.generate(5, { minLength: 10 });
+console.log('\n' + poem.text);
+console.log('\n' + display(poem));
 
 function display(poem, format/* [md, html] */) {
 
@@ -61,7 +34,31 @@ function display(poem, format/* [md, html] */) {
   return raw.trim();
 }
 
-let mm = new MetaMarkov(4, poems, { maxLengthMatch: 7, trace: 0 });
-let poem = mm.generate(5, { minLength: 10 });
-console.log('\n' + poem.text);
-console.log('\n' + display(poem));
+function loadPoems() {
+  let data = [].concat(
+    require('./data/Penguin_Prose_Poems.json'),
+    require('./data/Great_American_Prose_Poems.json'),
+    require('./data/Short_An_International_Anthology.json')
+  ).map((p, i) => {
+    let text = p.text
+      .replace(/[”“()]/g, '')
+      .replace(/((\r?\n)|<p>|[\s])+/g, ' ')
+      .replace(/(^[`‘’']|[`‘’']\s|\s[`‘’'])/g, ' ')
+      .replace(/[`‘’']([!?.])$/, '$1')
+      .replace(/!/, '.')
+      .replace(/:/, ',');
+    //let minSentenceLength = 7;
+    let sents = RiTa.sentences(text);
+    sents.map(s => {
+      let words = RiTa.tokenize(s);
+      words.map(w => w.startsWith('I') ? w : w.toLowerCase());
+      return RiTa.capitalize(RiTa.untokenize(words));
+    });
+    p.id = i;
+    p.text = sents.join(' ');
+    return p;
+  });
+  return data;
+}
+
+export { loadPoems, RiTa, MetaMarkov };
