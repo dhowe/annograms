@@ -12,6 +12,33 @@ class MetaMarkov {
       .filter(s => /^[A-Z]/.test(s));
   }
 
+  display(poem, format/* [md, html] */) {
+    let poems = this.source;
+    let raw = '', idx = 1, cursor = 0;
+    for (let i = 0; i < poem.meta.length; i++) {
+      let m = poem.meta[i];
+      let toks = m.tokens.slice(cursor - m.start);
+      let src = poems.find(p => p.id === m.sourceId);
+      //console.log(src);
+      if (!src) throw Error('No source for sourceId #' + m.sourceId);
+      let next = RiTa.untokenize(toks);
+      if (raw.length && !RiTa.isPunct(next[0])) raw += ' ';
+      if (format && format.toLowerCase() === 'md') {
+        raw += `[${next}](/sources?id=${src.id}&idx=${m.start})`;
+      }
+      else if (format && format.toLowerCase() === 'html') {
+        raw += `<a href class="meta">${next}<sup>${src.id}</sup></a>`;
+      }
+      else {
+        raw += `${next}[#${src.id}]`;
+      }
+      cursor += toks.length;
+    }
+    
+    console.log('\n'+poem.text+'\n\n'+raw.trim());
+
+    return raw.trim();
+  }
   generate(num, gopts = { minLength: 8 }) {
     let gen = this.model.generate(num, gopts);
     gen.forEach((g, i) => console.log(i + ") " + g));
@@ -38,7 +65,7 @@ class MetaMarkov {
         i += n + 1;
       }
       tokens.push(words[i]); // add next word
-      
+
       // check if still the same src
       if (!src.text.includes(RiTa.untokenize(tokens))) {
 
@@ -50,7 +77,8 @@ class MetaMarkov {
         // find source for the next phrase
         src = this._lookupSource(RiTa.untokenize(tokens = next), { output, index: i });
       }
-      //console.log('                 ' + tokens.length + '   ' + RiTa.untokenize(tokens) + ' -> ' + src.id);
+      //console.log('                 ' + tokens.length 
+      //+ '   ' + RiTa.untokenize(tokens) + ' -> ' + src.id);
     }
 
     this._addMeta(result, tokens, src, i); // last phrase
@@ -69,16 +97,12 @@ class MetaMarkov {
 
   _lookupSource(phrase, dbugInfo) {
     // could be multiple sources, picking 1st for now
-    //if (phrase.endsWith('<p>')) {
-    //phrase = phrase.replace(/<p>/, '');
-    //console.log('stripped: ' + phrase);
-    //}
-    let source = this.source.find(p => p.text.includes(phrase));
-    if (!source) throw Error(`(${dbugInfo.index}) `
+    let src = this.source.find(p => p.text.includes(phrase));
+    if (!src) throw Error(`(${dbugInfo.index}) `
       + `No source for "${phrase}"\n\n${dbugInfo.output}`);
     //console.log('_lookupSource: ' + dbugInfo.index + '-' 
     //+ (dbugInfo.index + this.model.n - 1), phrase, '-> ' + source.id);
-    return source;
+    return src;
   }
 }
 
