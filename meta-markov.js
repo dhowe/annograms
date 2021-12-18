@@ -12,18 +12,15 @@ class MetaMarkov {
       .filter(s => /^[A-Z]/.test(s));
   }
 
-  displayLines(poem) {
-    //let poems = this.source;
-    let raw = '', idx = 1, cursor = 0, indent = 0, last;
+  printLines(poem) {
+    let indent = 0, last;
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
-      
       let str = RiTa.untokenize(m.tokens);
       if (i > 0) {
         let sliceAt = m.start - last.start;
         if (sliceAt < this.model.n) {
           let indentSlice = last.tokens.slice(0, sliceAt);
-          //console.log(i,sliceAt, indentSlice);
           indent += 1 + RiTa.untokenize(indentSlice).length;
           for (let i = 0; i < indent; i++) str = ' ' + str;
         }
@@ -31,46 +28,10 @@ class MetaMarkov {
           indent = 0;
         }
       }
-      
+      if (!indent) console.log();
       console.log(str);
-
-      let slc = Math.max(0, cursor - m.start);
-      let toks = m.tokens.slice(slc);
-      let next = RiTa.untokenize(toks);
-
-      //console.log(i, m.start, next, '#' + m.sourceId, slc);
-
-
-      if (raw.length && !RiTa.isPunct(next[0])) raw += ' ';
-      raw += `${next}[#${m.sourceId}]`;
-
-      //console.log('    '+raw)
-
-      cursor += toks.length;
       last = m;
     }
-    //console.log('\n' + poem.text + '\n\n' + raw.trim());
-
-    return raw.trim();
-  }
-
-  display(poem, format/* [md, html] */) {
-    //let poems = this.source;
-    let raw = '', idx = 1, cursor = 0;
-    for (let i = 0; i < poem.meta.length; i++) {
-      let m = poem.meta[i];
-      console.log(m.start, RiTa.untokenize(m.tokens))
-      let slc = Math.max(0, cursor - m.start);
-      let toks = m.tokens.slice(slc);
-      let next = RiTa.untokenize(toks);
-      if (raw.length && !RiTa.isPunct(next[0])) raw += ' ';
-      raw += `${next}[#${m.sourceId}]`;
-      cursor += toks.length;
-    }
-
-    console.log('\n' + poem.text + '\n' + this.poemAsString(poem) + '\n' + this.poemAsString(poem,1));
-
-    return raw.trim();
   }
 
   display(poem, addSources) {
@@ -89,6 +50,7 @@ class MetaMarkov {
     }
     return str;
   }
+
 
 
   generate(num, gopts = { minLength: 8 }) {
