@@ -12,14 +12,14 @@ class MetaMarkov {
       .filter(s => /^[A-Z]/.test(s));
   }
 
-  printLines(poem) {
+  printLines(poem) { // need to invert order
     let indent = 0, last;
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
       let str = RiTa.untokenize(m.tokens);
       if (i > 0) {
         let sliceAt = m.start - last.start;
-        if (sliceAt < this.model.n) {
+        if (sliceAt < this.model.n) {// && !/[!.;:?]$/.test(str)) {
           let indentSlice = last.tokens.slice(0, sliceAt);
           indent += 1 + RiTa.untokenize(indentSlice).length;
           for (let i = 0; i < indent; i++) str = ' ' + str;
@@ -40,13 +40,13 @@ class MetaMarkov {
       let m = poem.meta[i];
       let diff = m.tokens.length;
       if (i < poem.meta.length - 1) {
-        let nextStart = poem.meta[i+1].start;
+        let nextStart = poem.meta[i + 1].start;
         diff = nextStart - m.start;
       }
       let toks = m.tokens.slice(0, diff);
       let next = RiTa.untokenize(toks);
       if (str.length && !RiTa.isPunct(next[0])) str += ' ';
-      str += next + (addSources ? `[#${ m.sourceId }]`: '');
+      str += next + (addSources ? `[#${m.sourceId}]` : '');
     }
     return str;
   }
@@ -62,13 +62,13 @@ class MetaMarkov {
 
   _annotate(output) {
 
-    let afterBreak = false;
     let n = this.model.n, i = n;
     let words = RiTa.tokenize(output);
 
     // start with first n tokens, find source
     let tokens = words.slice(0, n);
     let src = this._lookupSource(RiTa.untokenize(tokens), { output, index: 0 });
+    
     let poem = { text: output, tokens: words, meta: [] };
 
     let addMeta = () => {
@@ -76,20 +76,17 @@ class MetaMarkov {
       let meta = {
         tokens: tokens,
         sourceId: src.id,
-        start: (i - tokens.length)// + (afterBreak ? -1 : 0)
+        start: (i - tokens.length)
       };
       poem.meta.push(meta);
-      afterBreak = false;
     };
 
     for (; i < words.length; i++) {
       if (words[i] === lb) {
-        //this._addMeta(poem, tokens, src, i);
-        addMeta(poem, tokens, src, i);
+        addMeta();
         tokens = words.slice(i + 1, i + 1 + n);
-        src = this._lookupSource(RiTa.untokenize(tokens), { output, index: 0 });
-        //console.log('hit', RiTa.untokenize(tokens));
-        afterBreak = true;
+        src = this._lookupSource(RiTa.untokenize
+          (tokens), { output, index: 0 });
         i += n + 1;
       }
       tokens.push(words[i]); // add next word
@@ -100,19 +97,15 @@ class MetaMarkov {
         // if not we annotate with current src
         let next = tokens.slice(-n);
         tokens.pop();
-        //this._addMeta(poem, tokens, src, i);
         addMeta();
 
         // find source for the next phrase
-        src = this._lookupSource(RiTa.untokenize(tokens = next), { output, index: i });
+        src = this._lookupSource(RiTa.untokenize
+          (tokens = next), { output, index: i });
       }
-      //console.log('                 ' + tokens.length 
-      //+ '   ' + RiTa.untokenize(tokens) + ' -> ' + src.id);
     }
 
-    //this._addMeta(poem, tokens, src, i); // last phrase
-    addMeta();
-
+    addMeta(); // last phrase
     return poem;
   }
 

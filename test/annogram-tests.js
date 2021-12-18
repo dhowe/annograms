@@ -26,7 +26,8 @@ describe('MetaMarkov', function () {
       let mm = metaMarkov();
       let poem = mm._annotate(gen.join(' '));
       let poemText = mm.display(poem);
-      console.log('\n' + poem.text + '\n' + poemText + '\n' + mm.display(poem, 1))
+      console.log('\n' + poem.text + '\n' + poemText + '\n' + mm.display(poem, 1));
+      mm.printLines(poem);
       assert.equal(poemText, poem.text.replace(/<p>/g, ''));
     });
 
