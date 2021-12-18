@@ -63,35 +63,33 @@ class MetaMarkov {
       let slc = Math.max(0, cursor - m.start);
       let toks = m.tokens.slice(slc);
       let next = RiTa.untokenize(toks);
-
-      //console.log(i, m.start, next, '#' + m.sourceId, slc);
-
-
       if (raw.length && !RiTa.isPunct(next[0])) raw += ' ';
       raw += `${next}[#${m.sourceId}]`;
-
-      //console.log('    '+raw)
-
       cursor += toks.length;
-      //let src = poems.find(p => p.id === m.sourceId);
-      //console.log(src);
-      //if (!src) throw Error('No source for sourceId #' + m.sourceId);
-      /*       if (format && format.toLowerCase() === 'md') {
-              raw += `[${next}](/sources?id=${sid}&idx=${m.start})`;
-            }
-            else if (format && format.toLowerCase() === 'html') {
-              raw += `<a href class="meta">${next}<sup>${sid}</sup></a>`;
-            }
-            else {
-              raw += `${next}[#${sid}]`;
-            } */
-
     }
 
-    console.log('\n' + poem.text + '\n\n' + raw.trim());
+    console.log('\n' + poem.text + '\n' + this.poemAsString(poem) + '\n' + this.poemAsString(poem,1));
 
     return raw.trim();
   }
+
+  display(poem, addSources) {
+    let str = '';
+    for (let i = 0; i < poem.meta.length; i++) {
+      let m = poem.meta[i];
+      let diff = m.tokens.length;
+      if (i < poem.meta.length - 1) {
+        let nextStart = poem.meta[i+1].start;
+        diff = nextStart - m.start;
+      }
+      let toks = m.tokens.slice(0, diff);
+      let next = RiTa.untokenize(toks);
+      if (str.length && !RiTa.isPunct(next[0])) str += ' ';
+      str += next + (addSources ? `[#${ m.sourceId }]`: '');
+    }
+    return str;
+  }
+
 
   generate(num, gopts = { minLength: 8 }) {
     let gen = this.model.generate(num, gopts);

@@ -5,7 +5,6 @@ import poems from '../poems.js';
 describe('MetaMarkov', function () {
   describe('#annotate()', function () {
 
-    // WORKING HERE
     it('should annotate across sources1', function () {
       let gen = [
         'I will step out of the city.',
@@ -13,12 +12,9 @@ describe('MetaMarkov', function () {
       ];
       let mm = metaMarkov();
       let poem = mm._annotate(gen.join(' '));
-      assert.equal(typeof poem, 'object');
-      let lastMeta = poem.meta[poem.meta.length-1];
-      let lastSource = poems.find(p => p.id === lastMeta.sourceId);
-      //console.log(lastMeta);
-      let annotated = mm.display(poem);
-      assert.equal(annotated.replace(/\[#[0-9]+\]/g, ''), poem.text.replace(/<p> */g, ''));
+      let poemText = mm.display(poem);
+      console.log('\n' + poem.text + '\n' + poemText + '\n' + mm.display(poem, 1))
+      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
     });
 
     it('should annotate across sources2', function () {
@@ -28,10 +24,9 @@ describe('MetaMarkov', function () {
       ]
       let mm = metaMarkov();
       let poem = mm._annotate(gen.join(' '));
-      //console.log(poem.meta)
-      let annotated = mm.displayLines(poem);
-      assert.equal(annotated.replace(/\[#[0-9]+\]/g, ''), poem.text.replace(/<p> */g, ''));
-
+      let poemText = mm.display(poem);
+      console.log('\n' + poem.text + '\n' + poemText + '\n' + mm.display(poem,1))
+      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
     });
 
     function metaMarkov() {
