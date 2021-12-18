@@ -1,5 +1,7 @@
 const lineReader = require('line-reader');
-const linebreak = '\n', lbex = new RegExp(linebreak + '$');
+const linebreak = '\n', lbex = new RegExp('\w*' + linebreak + '\w*$');
+
+// TODO: ellipses
 
 const loadShortAnInternationalAnthology = function (log) {
 
@@ -194,8 +196,8 @@ const loadPenguinProsePoems = function (log) {
   });
 }
 
-function cleanText(textField) {
-  return textField.replace(lbex, '').trim();
+function cleanText(txt) {
+  return txt.replace(lbex, '').trim();
 }
 
 function validate(records) {
