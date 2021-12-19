@@ -1,7 +1,8 @@
 import RiTa from 'rita';
 
-let lb = '<p>';
-class MetaMarkov {
+const lb = '<p>';
+
+class Annogram {
 
   constructor(n, poems, opts = {}) {
     this.source = poems;
@@ -13,7 +14,7 @@ class MetaMarkov {
   }
 
   printLines(poem) { // need to invert order
-    let indent = 0, last;
+    let indent = 0, last, raw = '';
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
       let str = RiTa.untokenize(m.tokens);
@@ -28,11 +29,13 @@ class MetaMarkov {
           indent = 0;
         }
       }
-      if (!indent) console.log();
-      console.log(str);
+      raw += (indent ? '' : '\n') + str + '\n';
       last = m;
     }
+    console.log(raw);
+    return raw;
   }
+
 
   display(poem, addSources) {
     let str = '';
@@ -47,11 +50,12 @@ class MetaMarkov {
       let next = RiTa.untokenize(toks);
       if (str.length && !RiTa.isPunct(next[0])) str += ' ';
       str += next + (addSources ? `[#${m.sourceId}]` : '');
+      console.log(i, str)
     }
+    console.log('oem.meta[0]', poem.meta[0]);
+
     return str;
   }
-
-
 
   generate(num, gopts = { minLength: 8 }) {
     let gen = this.model.generate(num, gopts);
@@ -67,26 +71,22 @@ class MetaMarkov {
 
     // start with first n tokens, find source
     let tokens = words.slice(0, n);
-    let src = this._lookupSource(RiTa.untokenize(tokens), { output, index: 0 });
-    
+    let src = this._lookupSource(tokens, { output, index: 0 })[0];
     let poem = { text: output, tokens: words, meta: [] };
 
     let addMeta = () => {
-      //console.log(`"${p}" -> {pid: ${src.id}, tokens: ${len}}`);// '${src.title}' by ${src.author}`);
-      let meta = {
+      poem.meta.push({
         tokens: tokens,
         sourceId: src.id,
         start: (i - tokens.length)
-      };
-      poem.meta.push(meta);
+      });
     };
 
     for (; i < words.length; i++) {
       if (words[i] === lb) {
         addMeta();
         tokens = words.slice(i + 1, i + 1 + n);
-        src = this._lookupSource(RiTa.untokenize
-          (tokens), { output, index: 0 });
+        src = this._lookupSource(tokens, { output, index: 0 })[0];
         i += n + 1;
       }
       tokens.push(words[i]); // add next word
@@ -99,9 +99,8 @@ class MetaMarkov {
         tokens.pop();
         addMeta();
 
-        // find source for the next phrase
-        src = this._lookupSource(RiTa.untokenize
-          (tokens = next), { output, index: i });
+        // and find source for the next phrase
+        src = this._lookupSource(tokens = next, { output, index: i })[0];
       }
     }
 
@@ -110,15 +109,17 @@ class MetaMarkov {
   }
 
 
-  _lookupSource(phrase, dbugInfo) {
+  _lookupSource(tokens, dbugInfo) {
+    let phrase = RiTa.untokenize(tokens);
     // could be multiple sources, picking 1st for now
-    let src = this.source.find(p => p.text.includes(phrase));
-    if (!src) throw Error(`(${dbugInfo.index}) `
+    let srcs = this.source.filter(p => p.text.includes(phrase));
+    if (!srcs || !srcs.length) throw Error(`(${dbugInfo.index}) `
       + `No source for "${phrase}"\n\n${dbugInfo.output}`);
     //console.log('_lookupSource: ' + dbugInfo.index + '-' 
     //+ (dbugInfo.index + this.model.n - 1), phrase, '-> ' + source.id);
-    return src;
+    //console.log(srcs.length + ' options')
+    return srcs;
   }
 }
 
-export default MetaMarkov;
+export default Annogram;
