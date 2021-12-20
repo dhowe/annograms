@@ -2,7 +2,7 @@ import RiTa from 'rita';
 
 class Annogram {
 
-  constructor(n, poems, opts = {}) {
+  constructor(n, poems, opts = { trace: 0 }) {
     this.source = poems;
     opts.text = poems.map(p => p.text).join(Annogram.lb);
     //require('fs').writeFileSync('text.txt', opts.text); // tmp
@@ -28,13 +28,15 @@ class Annogram {
     return str;
   }
 
-  generate(num, gopts = { minLength: 8 }) {
+  generate(num, gopts = { minLength: 8, greedy: 0 }) {
+//this.trace = true;
     let gen = this.model.generate(num, gopts);
-    //gen.forEach((g, i) => console.log(i + ") " + g));
-    return this.annotate(gen);
+    //if (this.trace)
+    gen.forEach((g, i) => console.log(i + ") " + g));
+    return gopts.greedy ? this.annotateGreedy(gen) : this.annotate(gen);
   }
 
-  annotate(lines) {
+  annotate(lines, gopts) {
 
     let text = lines.join(' ');
     let words = RiTa.tokenize(text);
@@ -47,7 +49,7 @@ class Annogram {
         sourceId = this.lookupSource(tokens, { text, index: 0 })[0].id;
       }
       poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
-      //console.log(`[#${meta.sourceId}]`, RiTa.untokenize(tokens));
+      //if (this.trace) console.log(`[#${meta.sourceId}]`, RiTa.untokenize(tokens));
       tokens = [];
     }
 
@@ -65,6 +67,47 @@ class Annogram {
     return poem;
   }
 
+  annotateGreedy(lines) {
+
+    let n = this.model.n, dbug = true;
+    let text = lines.join(' ');
+    let words = RiTa.tokenize(text);
+    let tokens = words.slice(0, n);
+    let poem = { lines, text, tokens: words, meta: [] };
+    let src = this.lookupSource(tokens, { text, index: 0 })[0];
+
+    let addMeta = (idx) => {
+      poem.meta.push({
+        tokens,
+        sourceId: src.id, 
+        start: (idx - tokens.length)
+      });
+      if (this.trace) console.log(`g[#${src.id}]`, RiTa.untokenize(tokens));
+      tokens = [];
+    }
+
+    for (let i = n; i < words.length; i++) {
+
+      if (words[i] === Annogram.lb) {
+        //if (tokens.length) addMeta(i);
+        throw Error('TODO: handle line breaks')
+      }
+
+      tokens.push(words[i]);
+      if (!src.text.includes(RiTa.untokenize(tokens))) {
+        let next = tokens.slice(-n);
+        tokens.pop();
+        addMeta(i);
+
+        // find n-length source for the next phrase
+        src = this.lookupSource(tokens = next, { text, index: i })[0];
+      }
+    }
+
+    if (tokens.length) addMeta(words.length);
+
+    return poem;
+  }
 
   lookupSource(tokens, dbugInfo) {
     let phrase = RiTa.untokenize(tokens);
@@ -75,28 +118,34 @@ class Annogram {
     return srcs;
   }
 
-  printLines(poem) { // TODO: redo with original meta format
-    let indent = 0, last, raw = '';
+  asLines(poem) {
+    let indent = 0, result = [], last;
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
-      let str = RiTa.untokenize(m.tokens);
+      let phrase = RiTa.untokenize(m.tokens);
       if (i > 0) {
         let sliceAt = m.start - last.start;
-        if (sliceAt < this.model.n) {// && !/[!.;:?]$/.test(str)) {
+        if (sliceAt < this.model.n) {
           let indentSlice = last.tokens.slice(0, sliceAt);
-          indent += 1 + RiTa.untokenize(indentSlice).length;
-          for (let i = 0; i < indent; i++) str = ' ' + str;
+          let slice = RiTa.untokenize(indentSlice);
+          indent += slice.length + 1;
+          if (/^[',;:']/.test(phrase)) { // hide leading punctuation
+            phrase = ' '+ phrase.slice(1);
+            indent -= 1;
+          } 
+          for (let j = 0; j < indent; j++) phrase = ' ' + phrase;
         }
         else {
           indent = 0;
         }
       }
-      raw += (indent ? '' : '\n') + str + '\n';
+      result.push(phrase);
       last = m;
     }
-    console.log(raw);
-    return raw;
+    
+    return result;
   }
+
 }
 
 Annogram.lb = '<p>';

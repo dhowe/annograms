@@ -4,12 +4,72 @@ import poems from '../poems.js';
 import RiTa from 'rita';
 
 describe('Annograms', function () {
+  describe('#asLines()', function () {
+
+    it('should handle lineation', function () { // WORKING HERE (2)
+      let gen = [
+        'The ice-machine couldn’t keep up, and I was going to die.',
+        'The result is not a planet, but a woman, and the daughter of the house.',
+        /*         'On the way out of this, and it is called The Statues.',
+                'It begins like this, wars used to be, for he is.',
+                'He does not want to be touched by me.' */
+      ];
+      let mm = annogram();
+      let poem = mm.annotateGreedy(gen);
+      let pl = mm.asLines(poem);
+      //for (let i = 0; i < pl.length; i++) console.log(pl[i]);
+      let expected = [
+        'The ice-machine couldn’t keep up',
+        '                couldn’t keep up, and',
+        '                              up, and I',
+        '                                  and I was going to',
+        '                                        was going to die',
+        '                                            going to die.'
+      ];
+      assert.deepEqual(pl, expected);
+    });
+
+    it('should handle punctuation', function () {
+      let gen = [ 'The ice-machine couldn’t keep up, and I was going to die.' ];
+      let mm = annogram();
+      let poem = mm.annotateGreedy(gen);
+      let pl = mm.asLines(poem);
+      //for (let i = 0; i < pl.length; i++) console.log(pl[i]);
+      let expected = [
+        'The ice-machine couldn’t keep up',
+        '                couldn’t keep up, and',
+        '                              up, and I',
+        '                                  and I was going to',
+        '                                        was going to die',
+        '                                            going to die.'
+      ];
+      assert.deepEqual(pl, expected);
+    });
+  });
+
+  describe('#annotateGreedy()', function () {
+
+    this.timeout(20000);
+
+    // WORKING HERE (1) -- wait for <p> tag
+
+    it('should generate greedy annotations', function () {
+      let mm = annogram();
+      let poem = mm.generate(5, { minLength: 10, greedy: true });
+      let poemText = mm.display(poem);
+      console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
+      mm.asLines(poem);
+      assert.equal(poem.text.startsWith(poem.meta[0].tokens[0]), true,
+        'poem start: ' + poem.text.slice(0, 20) + ' != ' + poem.meta[0].tokens[0]);
+    });
+  });
+
   describe('#annotate()', function () {
 
     this.timeout(20000);
 
     it('should generate correct annotations', function () {
-      let mm = new Annogram(4, poems, { maxLengthMatch: 7, trace: 0 });
+      let mm = annogram();
       let poem = mm.generate(5, { minLength: 10 });
       let poemText = mm.display(poem);
       //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
@@ -26,7 +86,7 @@ describe('Annograms', function () {
       let poem = mm.annotate(gen);
       let poemText = mm.display(poem);
       //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
-      //mm.printLines(poem);
+      //mm.asLines(poem);
       assert.equal(poemText, poem.text.replace(/<p>/g, ''));
     });
 
@@ -39,7 +99,7 @@ describe('Annograms', function () {
       let poem = mm.annotate(gen);
       let poemText = mm.display(poem);
       //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
-      //mm.printLines(poem);
+      //mm.asLines(poem);
       assert.equal(poemText, poem.text.replace(/<p>/g, ''));
     });
 
@@ -49,7 +109,7 @@ describe('Annograms', function () {
       let poem = mm.annotate(gen);
       let poemText = mm.display(poem);
       //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
-      //mm.printLines(poem);
+      //mm.asLines(poem);
       assert.equal(poemText, poem.text.replace(/<p>/g, ''));
     });
 
@@ -66,14 +126,13 @@ describe('Annograms', function () {
       let poemText = mm.display(poem);
       //console.log(poem.meta);
       //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
-      //mm.printLines(poem);
+      //mm.asLines(poem);
       assert.equal(poemText, poem.text.replace(/<p>/g, ''));
     });
-
-    function annogram() {
-      return new Annogram(4, poems, { maxLengthMatch: 7, trace: 0 });
-    }
   });
+  function annogram() {
+    return new Annogram(4, poems, { maxLengthMatch: 7 });
+  }
 });
 
 
