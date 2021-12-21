@@ -167,6 +167,7 @@ const loadPenguinProsePoems = function (log) {
 
   let text = "", current = { source }, records = [];
   lineReader.eachLine(inpath, (line, done) => {
+
     let hasTitle = current.hasOwnProperty("title");
 
     if (line.length > 0) {
@@ -220,6 +221,7 @@ function writeRecords(records, file) {
   }
   try {
     require('fs').writeFileSync(file, JSON.stringify(records, 0, 2));
+    console.log('writing '+file)
   } catch (err) {
     console.error(err);
   }

@@ -2,7 +2,7 @@ import RiTa from 'rita';
 
 class Annogram {
 
-  constructor(n, poems, opts = { trace: 0 }) {
+  constructor(n, poems, opts = {}) {
     this.source = poems;
     opts.text = poems.map(p => p.text).join(Annogram.lb);
     //require('fs').writeFileSync('text.txt', opts.text); // tmp
@@ -28,15 +28,17 @@ class Annogram {
     return str;
   }
 
-  generate(num, gopts = { minLength: 8, greedy: 0 }) {
-//this.trace = true;
-    let gen = this.model.generate(num, gopts);
-    //if (this.trace)
-    gen.forEach((g, i) => console.log(i + ") " + g));
-    return gopts.greedy ? this.annotateGreedy(gen) : this.annotate(gen);
+  generate(num, opts = { minLength: 8, greedy: 0 }) {
+    let gen = this.model.generate(num, opts);
+    //gen.forEach((g, i) => console.log(i + ") " + g));
+    return this.annotate(gen, opts);
   }
 
-  annotate(lines, gopts) {
+  annotate(lines, opts = {}) {
+    return opts.greedy ? this.annotateGreedy(lines) : this.annotateLazy(lines);
+  }
+
+  annotateLazy(lines) {
 
     let text = lines.join(' ');
     let words = RiTa.tokenize(text);
@@ -45,12 +47,13 @@ class Annogram {
 
     let addMeta = (idx) => {
       let sourceId = -1;
-      if (tokens.length > 1 || !RiTa.isPunct(tokens[0])) {
+      if (idx === words.length -1 || tokens.length > 1 || !RiTa.isPunct(tokens[0])) { // skip if single punct token
         sourceId = this.lookupSource(tokens, { text, index: 0 })[0].id;
+        poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
+        tokens = [];
       }
-      poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
-      //if (this.trace) console.log(`[#${meta.sourceId}]`, RiTa.untokenize(tokens));
-      tokens = [];
+      //console.log(`[#${meta.sourceId}]`, RiTa.untokenize(tokens));
+      
     }
 
     for (let i = 0; i < words.length; i++) {
@@ -68,7 +71,6 @@ class Annogram {
   }
 
   annotateGreedy(lines) {
-
     let n = this.model.n, dbug = true;
     let text = lines.join(' ');
     let words = RiTa.tokenize(text);
@@ -79,18 +81,21 @@ class Annogram {
     let addMeta = (idx) => {
       poem.meta.push({
         tokens,
-        sourceId: src.id, 
+        sourceId: src.id,
         start: (idx - tokens.length)
       });
-      if (this.trace) console.log(`g[#${src.id}]`, RiTa.untokenize(tokens));
+      //console.log(`g[#${src.id}]`, RiTa.untokenize(tokens));
       tokens = [];
     }
 
     for (let i = n; i < words.length; i++) {
 
       if (words[i] === Annogram.lb) {
-        //if (tokens.length) addMeta(i);
-        throw Error('TODO: handle line breaks')
+        if (tokens.length) addMeta(i);
+        i++; // skip the LB
+        tokens = words.slice(i, i + n);
+        src = this.lookupSource(tokens, { text, index: i })[0];
+        i += n;
       }
 
       tokens.push(words[i]);
@@ -118,31 +123,34 @@ class Annogram {
     return srcs;
   }
 
-  asLines(poem) {
-    let indent = 0, result = [], last;
+  asLines(poem, { addSources = false/*, maxLineLength = 60*/ } = {}) {
+    let indent = 0, result = [], last, isNewline, isContline;
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
       let phrase = RiTa.untokenize(m.tokens);
-      if (i > 0) {
-        let sliceAt = m.start - last.start;
-        if (sliceAt < this.model.n) {
-          let indentSlice = last.tokens.slice(0, sliceAt);
-          let slice = RiTa.untokenize(indentSlice);
-          indent += slice.length + 1;
-          if (/^[',;:']/.test(phrase)) { // hide leading punctuation
-            phrase = ' '+ phrase.slice(1);
-            indent -= 1;
-          } 
-          for (let j = 0; j < indent; j++) phrase = ' ' + phrase;
-        }
-        else {
-          indent = 0;
-        }
+      if (/^[,;:]/.test(phrase)) {   // hide leading punct
+        phrase = ' ' + phrase.slice(1);
+        indent -= 1;
       }
+      if (i > 0 && !isNewline && !isContline) { // calculate indent
+        let sliceAt = m.start - last.start;
+        let indentSlice = last.tokens.slice(0, sliceAt);
+        let slice = RiTa.untokenize(indentSlice);
+        indent += slice.length + 1;
+        phrase = ' '.repeat(indent) + phrase; // apply indent
+      }
+      else {
+        indent = 0;
+        if (isContline && !phrase.startsWith('  ')) phrase = '  ' + phrase;
+      }
+      isNewline = /[.!?]$/.test(phrase); // at line-end, break
+      //isContline =/*  /[,;:]$/.test(phrase) && */ phrase.length > maxLineLength; // TODO:
       result.push(phrase);
       last = m;
     }
-    
+
+    if (addSources) result = result.map((r, i) => r = r + ' [#' + poem.meta[i].sourceId + ']')
+
     return result;
   }
 

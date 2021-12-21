@@ -10,6 +10,7 @@
   "main": "src/index.js",
   "scripts": {
     "main": "node -r esm index.js",
+    "parse": "node -r esm json-parser.js",
     "test": "mocha -r esm"
   },
   "devDependencies": {
