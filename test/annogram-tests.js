@@ -1,5 +1,5 @@
 import assert from 'assert';
-import Annogram from '../annogram';
+import {Annogram} from '../annogram';
 import poems from '../poems.js';
 import RiTa from 'rita';
 

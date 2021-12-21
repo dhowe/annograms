@@ -1,4 +1,4 @@
-import Annogram from './annogram';
+import { Annogram } from './annogram';
 import poems from './poems';
 
 let mm = new Annogram(4, poems, { maxLengthMatch: 7, trace: 0 });

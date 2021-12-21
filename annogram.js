@@ -224,4 +224,4 @@ class Annogram {
 
 Annogram.lb = '<p>';
 
-export default Annogram;
+export { Annogram };
