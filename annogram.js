@@ -201,9 +201,11 @@ class Annogram {
       }
       after += after.length > 70 ? " ..." : src.text[afterStartIndex];
 
-      sourceDiv.append(html`<span class="sourceText">${before}</span>`);
-      sourceDiv.append(html`<span class="sourceHighlight">${next}</span>`);
-      sourceDiv.append(html`<span class="sourceText">${after}</span>`);
+      let spans = `<span class="sourceText">${before}</span>`;
+      spans += `<span class="sourceHighlight">${next}</span>`;
+      spans += `<span class="sourceText">${after}</span>`;
+      sourceDiv.append(html`${spans}`);
+
 
       // handle titles starting with 'from'
       let title = src.title.trim().replace(/^[Ff]rom /, '');
