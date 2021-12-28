@@ -224,4 +224,9 @@ class Annogram {
 
 Annogram.lb = '<p>';
 
-if (module && module.exports) module.exports = Annogram;
+// if (module && module.exports) {
+//   module.exports = Annogram;
+// }
+// else {
+export { Annogram };
+//}
