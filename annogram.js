@@ -2,9 +2,8 @@
 
 class Annogram {
 
-  constructor(n, poems, opts = {}) {
-    this.RiTa;
-    if (RiTa) this.RiTa = RiTa;
+  constructor(n, poems, opts = {}, rita) {
+    this.RiTa = rita;
     this.source = poems;
     opts.text = poems.map(p => p.text).join(Annogram.lb);
     //require('fs').writeFileSync('text.txt', opts.text); // tmp
