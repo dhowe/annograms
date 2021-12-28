@@ -47,13 +47,13 @@ class Annogram {
 
     let addMeta = (idx) => {
       let sourceId = -1;
-      if (idx === words.length - 1 || tokens.length > 1 || !RiTa.isPunct(tokens[0])) { // skip if single punct token
+      // skip if we have a single punct token
+      if (idx === words.length - 1 || tokens.length > 1 || !RiTa.isPunct(tokens[0])) { 
         sourceId = this.lookupSource(tokens, { text, index: 0 })[0].id;
         poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
         tokens = [];
       }
       //console.log(`[#${meta.sourceId}]`, RiTa.untokenize(tokens));
-
     }
 
     for (let i = 0; i < words.length; i++) {
@@ -128,7 +128,7 @@ class Annogram {
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
       let phrase = RiTa.untokenize(m.tokens);
-      if (/^[,;:]/.test(phrase)) {   // hide leading punct
+      if (/^[,;:]/.test(phrase)) {             // hide leading punct
         phrase = ' ' + phrase.slice(1);
         indent -= 1;
       }
@@ -137,14 +137,14 @@ class Annogram {
         let indentSlice = last.tokens.slice(0, sliceAt);
         let slice = RiTa.untokenize(indentSlice);
         indent += slice.length + 1;
-        phrase = ' '.repeat(indent) + phrase; // apply indent
+        phrase = ' '.repeat(indent) + phrase;   // apply indent
       }
       else {
         indent = 0;
         if (isContline && !phrase.startsWith('  ')) phrase = '  ' + phrase;
       }
       isNewline = /[.!?]$/.test(phrase); // at line-end, break
-      //isContline =/*  /[,;:]$/.test(phrase) && */ phrase.length > maxLineLength; // TODO:
+      //isContline =/*  /[,;:]$/.test(phrase) && */ phrase.length > maxLineLength; 
       result.push(phrase);
       last = m;
     }
@@ -162,7 +162,7 @@ class Annogram {
       let m = poem.meta[i];
 
       // Note that some meta elements may have id = -1
-      //   which means they shouldn't get a highlight
+      // which means they shouldn't get a highlight
       if (m.sourceId < 0) throw Error('TODO: handle sourceId == -1');
 
       let toks = m.tokens.slice(cursor - m.start);
@@ -224,9 +224,4 @@ class Annogram {
 
 Annogram.lb = '<p>';
 
-// if (module && module.exports) {
-//   module.exports = Annogram;
-// }
-// else {
 export { Annogram };
-//}
