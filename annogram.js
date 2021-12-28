@@ -1,12 +1,13 @@
-import RiTa from 'rita';
+//import RiTa from 'rita';
 
 class Annogram {
 
-  constructor(n, poems, opts = {}) {
+  constructor(n, poems, opts = {}, rita) {
+    this.RiTa = rita;
     this.source = poems;
     opts.text = poems.map(p => p.text).join(Annogram.lb);
     //require('fs').writeFileSync('text.txt', opts.text); // tmp
-    this.model = RiTa.markov(n, opts);
+    this.model = this.RiTa.markov(n, opts);
     this.model.sentenceStarts = this.model.sentenceStarts
       .filter(s => /^[A-Z]/.test(s));
   }
@@ -21,8 +22,8 @@ class Annogram {
         diff = nextStart - m.start;
       }
       let toks = m.tokens.slice(0, diff);
-      let next = RiTa.untokenize(toks);
-      if (str.length && !RiTa.isPunct(next[0])) str += ' ';
+      let next = this.RiTa.untokenize(toks);
+      if (str.length && !this.RiTa.isPunct(next[0])) str += ' ';
       str += next + (addSources ? `[#${m.sourceId}]` : '');
     }
     return str;
@@ -41,19 +42,19 @@ class Annogram {
   annotateLazy(lines) {
 
     let text = lines.join(' ');
-    let words = RiTa.tokenize(text);
+    let words = this.RiTa.tokenize(text);
     let poem = { lines, text, tokens: words, meta: [] };
     let tlen = this.model.n - 1, tokens = [];
 
     let addMeta = (idx) => {
       let sourceId = -1;
       // skip if we have a single punct token
-      if (idx === words.length - 1 || tokens.length > 1 || !RiTa.isPunct(tokens[0])) { 
+      if (idx === words.length - 1 || tokens.length > 1 || !this.RiTa.isPunct(tokens[0])) { 
         sourceId = this.lookupSource(tokens, { text, index: 0 })[0].id;
         poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
         tokens = [];
       }
-      //console.log(`[#${meta.sourceId}]`, RiTa.untokenize(tokens));
+      //console.log(`[#${meta.sourceId}]`, this.RiTa.untokenize(tokens));
     }
 
     for (let i = 0; i < words.length; i++) {
@@ -73,7 +74,7 @@ class Annogram {
   annotateGreedy(lines) {
     let n = this.model.n, dbug = true;
     let text = lines.join(' ');
-    let words = RiTa.tokenize(text);
+    let words = this.RiTa.tokenize(text);
     let tokens = words.slice(0, n);
     let poem = { lines, text, tokens: words, meta: [] };
     let src = this.lookupSource(tokens, { text, index: 0 })[0];
@@ -84,7 +85,7 @@ class Annogram {
         sourceId: src.id,
         start: (idx - tokens.length)
       });
-      //console.log(`g[#${src.id}]`, RiTa.untokenize(tokens));
+      //console.log(`g[#${src.id}]`, this.RiTa.untokenize(tokens));
       tokens = [];
     }
 
@@ -99,7 +100,7 @@ class Annogram {
       }
 
       tokens.push(words[i]);
-      if (!src.text.includes(RiTa.untokenize(tokens))) {
+      if (!src.text.includes(this.RiTa.untokenize(tokens))) {
         let next = tokens.slice(-n);
         tokens.pop();
         addMeta(i);
@@ -115,7 +116,7 @@ class Annogram {
   }
 
   lookupSource(tokens, dbugInfo) {
-    let phrase = RiTa.untokenize(tokens);
+    let phrase = this.RiTa.untokenize(tokens);
     let srcs = this.source.filter(p => p.text.includes(phrase));
     if (!srcs || !srcs.length) throw Error(`(${dbugInfo.index}) `
       + `No source for "${phrase}"\n\n${dbugInfo.text}`);
@@ -127,7 +128,7 @@ class Annogram {
     let indent = 0, result = [], last, isNewline, isContline;
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
-      let phrase = RiTa.untokenize(m.tokens);
+      let phrase = this.RiTa.untokenize(m.tokens);
       if (/^[,;:]/.test(phrase)) {             // hide leading punct
         phrase = ' ' + phrase.slice(1);
         indent -= 1;
@@ -135,7 +136,7 @@ class Annogram {
       if (i > 0 && !isNewline && !isContline) { // calculate indent
         let sliceAt = m.start - last.start;
         let indentSlice = last.tokens.slice(0, sliceAt);
-        let slice = RiTa.untokenize(indentSlice);
+        let slice = this.RiTa.untokenize(indentSlice);
         indent += slice.length + 1;
         phrase = ' '.repeat(indent) + phrase;   // apply indent
       }
@@ -156,7 +157,9 @@ class Annogram {
 
   displayHtml(poem) {
     let cursor = 0, maxLineWidth = 70;
-    let resultDiv = html`<div class="display"></div>`;
+    //let resultDiv = html`<div class="display"></div>`;
+    let resultDiv = document.createElement("div");
+    resultDiv.classList.add("display");
 
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
@@ -169,10 +172,13 @@ class Annogram {
       let src = this.source.find(p => p.id === m.sourceId);
       if (!src) throw Error('No source for sourceId #' + m.sourceId);
 
-      let next = RiTa.untokenize(toks);
-      if (raw.length && !RiTa.isPunct(next[0])) resultDiv.append(' ');
+      let next = this.RiTa.untokenize(toks);
+      if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
-      let sourceDiv = html`<div class="source" id="source${i}"></div>`;
+      //let sourceDiv = html`<div class="source" id="source${i}"></div>`;
+      let sourceDiv = document.createElement("div");
+      sourceDiv.classList.add("source");
+      sourceDiv.id = "source" + i;
       let regexStr = next.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       if (/[A-Za-z]/.test(next[0])) regexStr = "(?<![A-Za-z])" + regexStr;
       if (/[A-Za-z]/.test(next[next.length - 1])) regexStr += "(?![A-Za-z])";
@@ -201,19 +207,41 @@ class Annogram {
       }
       after += after.length > 70 ? " ..." : src.text[afterStartIndex];
 
-      let spans = `<span class="sourceText">${before}</span>`;
-      spans += `<span class="sourceHighlight">${next}</span>`;
-      spans += `<span class="sourceText">${after}</span>`;
-      sourceDiv.append(html`${spans}`);
+      // let spans = `<span class="sourceText">${before}</span>`;
+      // spans += `<span class="sourceHighlight">${next}</span>`;
+      // spans += `<span class="sourceText">${after}</span>`;
+      // sourceDiv.append(html`${spans}`);
+      let spans = [];
+      let beforeSpan = document.createElement("span");
+      beforeSpan.classList.add("sourceText");
+      beforeSpan.append(before);
+      spans.push(beforeSpan);
+      let nextSpan = document.createElement("span");
+      nextSpan.classList.add("sourceHighlight");
+      nextSpan.append(next);
+      spans.push(nextSpan);
+      let afterSpan = document.createElement("span");
+      afterSpan.classList.add("sourceText");
+      afterSpan.append(after);
+      spans.push(afterSpan);
 
+      sourceDiv.append(...spans);
 
       // handle titles starting with 'from'
       let title = src.title.trim().replace(/^[Ff]rom /, '');
-      sourceDiv.append(
-        html`<p class="sourceFootnote">from <i>${title}</i> by ${src.author}</p>`
-      );
+      // sourceDiv.append(
+      //   html`<p class="sourceFootnote">from <i>${title}</i> by ${src.author}</p>`
+      // );
+      let footnoteSpan = document.createElement("span");
+      footnoteSpan.classList.add("sourceFootnote");
+      footnoteSpan.innerHTML = "from <i>" + title + "</i> by " + src.author;
+      sourceDiv.append(footnoteSpan);
 
-      let thisSegment = html`<a href="javascript:void(0)" class="meta">${next}</a>`;
+      //let thisSegment = html`<a href="javascript:void(0)" class="meta">${next}</a>`;
+      let thisSegment = document.createElement("a");
+      thisSegment.classList.add("meta");
+      thisSegment.href = "javascript:void(0)";
+      thisSegment.append(next);
       thisSegment.append(sourceDiv);
       resultDiv.append(thisSegment);
 
