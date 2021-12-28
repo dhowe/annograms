@@ -221,6 +221,7 @@ class Annogram {
       spans.push(afterSpan);
 
       sourceDiv.append(...spans);
+      sourceDiv.append(document.createElement("br"));
 
       // handle titles starting with 'from'
       let title = src.title.trim().replace(/^[Ff]rom /, '');
