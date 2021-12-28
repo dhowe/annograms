@@ -1,4 +1,4 @@
-import RiTa from 'rita';
+//import RiTa from 'rita';
 
 class Annogram {
 
