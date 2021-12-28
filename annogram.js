@@ -157,7 +157,9 @@ class Annogram {
 
   displayHtml(poem) {
     let cursor = 0, maxLineWidth = 70;
-    let resultDiv = html`<div class="display"></div>`;
+    //let resultDiv = html`<div class="display"></div>`;
+    let resultDiv = document.createElement("div");
+    resultDiv.classList.add("display");
 
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
@@ -173,7 +175,10 @@ class Annogram {
       let next = this.RiTa.untokenize(toks);
       if (raw.length && !this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
-      let sourceDiv = html`<div class="source" id="source${i}"></div>`;
+      //let sourceDiv = html`<div class="source" id="source${i}"></div>`;
+      let sourceDiv = document.createElement("div");
+      sourceDiv.classList.add("source");
+      sourceDiv.id = "source" + i;
       let regexStr = next.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       if (/[A-Za-z]/.test(next[0])) regexStr = "(?<![A-Za-z])" + regexStr;
       if (/[A-Za-z]/.test(next[next.length - 1])) regexStr += "(?![A-Za-z])";
@@ -202,19 +207,41 @@ class Annogram {
       }
       after += after.length > 70 ? " ..." : src.text[afterStartIndex];
 
-      let spans = `<span class="sourceText">${before}</span>`;
-      spans += `<span class="sourceHighlight">${next}</span>`;
-      spans += `<span class="sourceText">${after}</span>`;
-      sourceDiv.append(html`${spans}`);
+      // let spans = `<span class="sourceText">${before}</span>`;
+      // spans += `<span class="sourceHighlight">${next}</span>`;
+      // spans += `<span class="sourceText">${after}</span>`;
+      // sourceDiv.append(html`${spans}`);
+      let spans = [];
+      let beforeSpan = document.createElement("span");
+      beforeSpan.classList.add("sourceText");
+      beforeSpan.append(before);
+      spans.push(beforeSpan);
+      let nextSpan = document.createElement("span");
+      nextSpan.classList.add("sourceHighlight");
+      nextSpan.append(next);
+      spans.push(nextSpan);
+      let afterSpan = document.createElement("span");
+      afterSpan.classList.add("sourceText");
+      afterSpan.append(after);
+      spans.push(afterSpan);
 
+      sourceDiv.append(...spans);
 
       // handle titles starting with 'from'
       let title = src.title.trim().replace(/^[Ff]rom /, '');
-      sourceDiv.append(
-        html`<p class="sourceFootnote">from <i>${title}</i> by ${src.author}</p>`
-      );
+      // sourceDiv.append(
+      //   html`<p class="sourceFootnote">from <i>${title}</i> by ${src.author}</p>`
+      // );
+      let footnoteSpan = document.createElement("span");
+      footnoteSpan.classList.add("sourceFootnote");
+      footnoteSpan.innerHTML = "from <i>" + title + "</i> by " + src.author;
+      sourceDiv.append(footnoteSpan);
 
-      let thisSegment = html`<a href="javascript:void(0)" class="meta">${next}</a>`;
+      //let thisSegment = html`<a href="javascript:void(0)" class="meta">${next}</a>`;
+      let thisSegment = document.createElement("a");
+      thisSegment.classList.add("meta");
+      thisSegment.href = "javascript:void(0)";
+      thisSegment.append(next);
       thisSegment.append(sourceDiv);
       resultDiv.append(thisSegment);
 
