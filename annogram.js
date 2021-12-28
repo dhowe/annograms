@@ -173,7 +173,7 @@ class Annogram {
       if (!src) throw Error('No source for sourceId #' + m.sourceId);
 
       let next = this.RiTa.untokenize(toks);
-      if (raw.length && !this.RiTa.isPunct(next[0])) resultDiv.append(' ');
+      if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
       //let sourceDiv = html`<div class="source" id="source${i}"></div>`;
       let sourceDiv = document.createElement("div");
