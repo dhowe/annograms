@@ -2,9 +2,10 @@
 
 class Annogram {
 
-  constructor(n, poems, opts = {}, rita) {
-    this.RiTa = rita;
+  constructor(n, poems, opts = {}) {
+    
     this.source = poems;
+    this.RiTa = opts.RiTa || RiTa;
     opts.text = poems.map(p => p.text).join(Annogram.lb);
     //require('fs').writeFileSync('text.txt', opts.text); // tmp
     this.model = this.RiTa.markov(n, opts);
@@ -157,7 +158,6 @@ class Annogram {
 
   displayHtml(poem) {
     let cursor = 0, maxLineWidth = 70;
-    //let resultDiv = html`<div class="display"></div>`;
     let resultDiv = document.createElement("div");
     resultDiv.classList.add("display");
 
@@ -175,7 +175,6 @@ class Annogram {
       let next = this.RiTa.untokenize(toks);
       if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
-      //let sourceDiv = html`<div class="source" id="source${i}"></div>`;
       let sourceDiv = document.createElement("div");
       sourceDiv.classList.add("source");
       sourceDiv.id = "source" + i;
@@ -207,10 +206,6 @@ class Annogram {
       }
       after += after.length > 70 ? " ..." : src.text[afterStartIndex];
 
-      // let spans = `<span class="sourceText">${before}</span>`;
-      // spans += `<span class="sourceHighlight">${next}</span>`;
-      // spans += `<span class="sourceText">${after}</span>`;
-      // sourceDiv.append(html`${spans}`);
       let spans = [];
       let beforeSpan = document.createElement("span");
       beforeSpan.classList.add("sourceText");
@@ -229,15 +224,11 @@ class Annogram {
 
       // handle titles starting with 'from'
       let title = src.title.trim().replace(/^[Ff]rom /, '');
-      // sourceDiv.append(
-      //   html`<p class="sourceFootnote">from <i>${title}</i> by ${src.author}</p>`
-      // );
       let footnoteSpan = document.createElement("span");
       footnoteSpan.classList.add("sourceFootnote");
       footnoteSpan.innerHTML = "from <i>" + title + "</i> by " + src.author;
       sourceDiv.append(footnoteSpan);
 
-      //let thisSegment = html`<a href="javascript:void(0)" class="meta">${next}</a>`;
       let thisSegment = document.createElement("a");
       thisSegment.classList.add("meta");
       thisSegment.href = "javascript:void(0)";

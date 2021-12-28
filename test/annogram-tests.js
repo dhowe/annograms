@@ -216,37 +216,6 @@ describe('Annograms', function () {
     });
   });
   function annogram() {
-    return new Annogram(4, poems, { maxLengthMatch: 7 });
+    return new Annogram(4, poems, { maxLengthMatch: 7, RiTa });
   }
 });
-
-
-/*function annotate(output, n = 4) {
-  
-  let tlen = n - 1, tokens = [];
-  let words = RiTa.tokenize(output);
-  let poem = { text: output, tokens: words, meta: [] };
-
-  for (let i = 0; i < words.length; i++) {
-    tokens.push(words[i]);
-    if (tokens.length === tlen) {
-      let src = lookupSource(tokens, { output, index: 0 })[0];
-      poem.meta.push({
-        tokens: tokens,
-        sourceId: src.id,
-        start: (i - tokens.length)
-      });
-      tokens = [];
-    }
-  }
-  return poem;
-}
-
-function lookupSource(tokens, dbugInfo) {
-  let phrase = RiTa.untokenize(tokens);
-  let srcs = poems.filter(p => p.text.includes(phrase));
-  if (!srcs || !srcs.length) throw Error(`(${dbugInfo.index}) `
-    + `No source for "${phrase}"\n\n${dbugInfo.output}`);
-  srcs.sort((a, b) => a.id - b.id);
-  return srcs;
-}*/
