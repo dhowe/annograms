@@ -1,12 +1,14 @@
-//import RiTa from 'rita';
+import RiTa from 'rita';
 
 class Annogram {
 
   constructor(n, poems, opts = {}) {
+    this.RiTa;
+    if (RiTa) this.RiTa = RiTa;
     this.source = poems;
     opts.text = poems.map(p => p.text).join(Annogram.lb);
     //require('fs').writeFileSync('text.txt', opts.text); // tmp
-    this.model = RiTa.markov(n, opts);
+    this.model = this.RiTa.markov(n, opts);
     this.model.sentenceStarts = this.model.sentenceStarts
       .filter(s => /^[A-Z]/.test(s));
   }
@@ -21,8 +23,8 @@ class Annogram {
         diff = nextStart - m.start;
       }
       let toks = m.tokens.slice(0, diff);
-      let next = RiTa.untokenize(toks);
-      if (str.length && !RiTa.isPunct(next[0])) str += ' ';
+      let next = this.RiTa.untokenize(toks);
+      if (str.length && !this.RiTa.isPunct(next[0])) str += ' ';
       str += next + (addSources ? `[#${m.sourceId}]` : '');
     }
     return str;
@@ -41,19 +43,19 @@ class Annogram {
   annotateLazy(lines) {
 
     let text = lines.join(' ');
-    let words = RiTa.tokenize(text);
+    let words = this.RiTa.tokenize(text);
     let poem = { lines, text, tokens: words, meta: [] };
     let tlen = this.model.n - 1, tokens = [];
 
     let addMeta = (idx) => {
       let sourceId = -1;
       // skip if we have a single punct token
-      if (idx === words.length - 1 || tokens.length > 1 || !RiTa.isPunct(tokens[0])) { 
+      if (idx === words.length - 1 || tokens.length > 1 || !this.RiTa.isPunct(tokens[0])) { 
         sourceId = this.lookupSource(tokens, { text, index: 0 })[0].id;
         poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
         tokens = [];
       }
-      //console.log(`[#${meta.sourceId}]`, RiTa.untokenize(tokens));
+      //console.log(`[#${meta.sourceId}]`, this.RiTa.untokenize(tokens));
     }
 
     for (let i = 0; i < words.length; i++) {
@@ -73,7 +75,7 @@ class Annogram {
   annotateGreedy(lines) {
     let n = this.model.n, dbug = true;
     let text = lines.join(' ');
-    let words = RiTa.tokenize(text);
+    let words = this.RiTa.tokenize(text);
     let tokens = words.slice(0, n);
     let poem = { lines, text, tokens: words, meta: [] };
     let src = this.lookupSource(tokens, { text, index: 0 })[0];
@@ -84,7 +86,7 @@ class Annogram {
         sourceId: src.id,
         start: (idx - tokens.length)
       });
-      //console.log(`g[#${src.id}]`, RiTa.untokenize(tokens));
+      //console.log(`g[#${src.id}]`, this.RiTa.untokenize(tokens));
       tokens = [];
     }
 
@@ -99,7 +101,7 @@ class Annogram {
       }
 
       tokens.push(words[i]);
-      if (!src.text.includes(RiTa.untokenize(tokens))) {
+      if (!src.text.includes(this.RiTa.untokenize(tokens))) {
         let next = tokens.slice(-n);
         tokens.pop();
         addMeta(i);
@@ -115,7 +117,7 @@ class Annogram {
   }
 
   lookupSource(tokens, dbugInfo) {
-    let phrase = RiTa.untokenize(tokens);
+    let phrase = this.RiTa.untokenize(tokens);
     let srcs = this.source.filter(p => p.text.includes(phrase));
     if (!srcs || !srcs.length) throw Error(`(${dbugInfo.index}) `
       + `No source for "${phrase}"\n\n${dbugInfo.text}`);
@@ -127,7 +129,7 @@ class Annogram {
     let indent = 0, result = [], last, isNewline, isContline;
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
-      let phrase = RiTa.untokenize(m.tokens);
+      let phrase = this.RiTa.untokenize(m.tokens);
       if (/^[,;:]/.test(phrase)) {             // hide leading punct
         phrase = ' ' + phrase.slice(1);
         indent -= 1;
@@ -135,7 +137,7 @@ class Annogram {
       if (i > 0 && !isNewline && !isContline) { // calculate indent
         let sliceAt = m.start - last.start;
         let indentSlice = last.tokens.slice(0, sliceAt);
-        let slice = RiTa.untokenize(indentSlice);
+        let slice = this.RiTa.untokenize(indentSlice);
         indent += slice.length + 1;
         phrase = ' '.repeat(indent) + phrase;   // apply indent
       }
@@ -169,8 +171,8 @@ class Annogram {
       let src = this.source.find(p => p.id === m.sourceId);
       if (!src) throw Error('No source for sourceId #' + m.sourceId);
 
-      let next = RiTa.untokenize(toks);
-      if (raw.length && !RiTa.isPunct(next[0])) resultDiv.append(' ');
+      let next = this.RiTa.untokenize(toks);
+      if (raw.length && !this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
       let sourceDiv = html`<div class="source" id="source${i}"></div>`;
       let regexStr = next.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
