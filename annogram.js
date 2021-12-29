@@ -224,10 +224,10 @@ class Annogram {
 
       // handle titles starting with 'from'
       let title = src.title.trim().replace(/^[Ff]rom /, '');
-      let footnoteSpan = document.createElement("span");
-      footnoteSpan.classList.add("sourceFootnote");
-      footnoteSpan.innerHTML = "from <i>" + title + "</i> by " + src.author;
-      sourceDiv.append(footnoteSpan);
+      let footnotePara = document.createElement("p");
+      footnotePara.classList.add("sourceFootnote");
+      footnotePara.innerHTML = "from <i>" + title + "</i> by " + src.author;
+      sourceDiv.append(footnotePara);
 
       let thisSegment = document.createElement("a");
       thisSegment.classList.add("meta");
