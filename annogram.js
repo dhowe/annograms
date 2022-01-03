@@ -160,6 +160,7 @@ class Annogram {
     let cursor = 0, maxLineWidth = 70;
     let resultDiv = document.createElement("div");
     resultDiv.classList.add("display");
+    let noBreakWrap;
 
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
@@ -234,7 +235,19 @@ class Annogram {
       thisSegment.href = "javascript:void(0)";
       thisSegment.append(next);
       thisSegment.append(sourceDiv);
-      resultDiv.append(thisSegment);
+      //prevent lb on punctuations
+      if (i < poem.meta.length - 1 && this.RiTa.isPunct(((poem.meta[i + 1].tokens).slice(cursor - m.start))[0])) {
+        if (typeof noBreakWrap === "undefined") {
+          noBreakWrap = document.createElement("nobr");
+        }
+        noBreakWrap.append(thisSegment);
+      } else if (typeof noBreakWrap !== "undefined") {
+        noBreakWrap.append(thisSegment);
+        resultDiv.append(noBreakWrap);
+        noBreakWrap = undefined;
+      } else {
+        resultDiv.append(thisSegment);
+      }
 
       cursor += toks.length;
     }
