@@ -173,18 +173,19 @@ class Annogram {
       if (!src) throw Error('No source for sourceId #' + m.sourceId);
 
       let next = this.RiTa.untokenize(toks);
+      let nextForSourceSearch = this.RiTa.untokenize(m.tokens);
       if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
       let sourceDiv = document.createElement("div");
       sourceDiv.classList.add("source");
       sourceDiv.id = "source" + i;
-      let regexStr = next.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      if (/[A-Za-z]/.test(next[0])) regexStr = "(?<![A-Za-z])" + regexStr;
-      if (/[A-Za-z]/.test(next[next.length - 1])) regexStr += "(?![A-Za-z])";
+      let regexStr = nextForSourceSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (/[A-Za-z]/.test(nextForSourceSearch[0])) regexStr = "(?<![A-Za-z])" + regexStr;
+      if (/[A-Za-z]/.test(nextForSourceSearch[nextForSourceSearch.length - 1])) regexStr += "(?![A-Za-z])";
 
       const regex = new RegExp(regexStr);
-      let inOriginIndexFrom = (regex.exec(src.text)) ? (regex.exec(src.text)).index : src.text.indexOf(next);
-      let inOriginIndexTo = inOriginIndexFrom + next.length;
+      let inOriginIndexFrom = (regex.exec(src.text)) ? (regex.exec(src.text)).index : src.text.indexOf(nextForSourceSearch);
+      let inOriginIndexTo = inOriginIndexFrom + nextForSourceSearch.length;
       // 140 characters before and after
       const targetCharacterNo = 140;
       let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
@@ -225,7 +226,7 @@ class Annogram {
       spans.push(beforeSpan);
       let nextSpan = document.createElement("span");
       nextSpan.classList.add("sourceHighlight");
-      nextSpan.append(next);
+      nextSpan.append(nextForSourceSearch);
       spans.push(nextSpan);
       let afterSpan = document.createElement("span");
       afterSpan.classList.add("sourceText");
