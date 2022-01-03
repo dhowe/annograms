@@ -157,7 +157,7 @@ class Annogram {
   }
 
   displayHtml(poem) {
-    let cursor = 0, maxLineWidth = 70;
+    let cursor = 0;
     let resultDiv = document.createElement("div");
     resultDiv.classList.add("display");
     let noBreakWrap;
@@ -174,39 +174,52 @@ class Annogram {
       if (!src) throw Error('No source for sourceId #' + m.sourceId);
 
       let next = this.RiTa.untokenize(toks);
+      let nextForSourceSearch = this.RiTa.untokenize(m.tokens);
       if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
       let sourceDiv = document.createElement("div");
       sourceDiv.style.wordBreak = "normal";
       sourceDiv.classList.add("source");
       sourceDiv.id = "source" + i;
-      let regexStr = next.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      if (/[A-Za-z]/.test(next[0])) regexStr = "(?<![A-Za-z])" + regexStr;
-      if (/[A-Za-z]/.test(next[next.length - 1])) regexStr += "(?![A-Za-z])";
+      let regexStr = nextForSourceSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (/[A-Za-z]/.test(nextForSourceSearch[0])) regexStr = "(?<![A-Za-z])" + regexStr;
+      if (/[A-Za-z]/.test(nextForSourceSearch[nextForSourceSearch.length - 1])) regexStr += "(?![A-Za-z])";
 
       const regex = new RegExp(regexStr);
-      let inOriginIndexFrom = (regex.exec(src.text)) ? (regex.exec(src.text)).index : src.text.indexOf(next);
-      let inOriginIndexTo = inOriginIndexFrom + next.length;
-      let before = "", beforeStartIndex = inOriginIndexFrom - 1;
-
-      while (beforeStartIndex >= 0 && !/[.?!]/.test(src.text[beforeStartIndex])) {
-        if (src.text[beforeStartIndex] === ' ' && before.length > maxLineWidth) {
-          before = "... " + before;
-          break;
-        }
-        before = src.text[beforeStartIndex] + before;
-        beforeStartIndex--;
-      }
-
+      let inOriginIndexFrom = (regex.exec(src.text)) ? (regex.exec(src.text)).index : src.text.indexOf(nextForSourceSearch);
+      let inOriginIndexTo = inOriginIndexFrom + nextForSourceSearch.length;
+      // 140 characters before and after
+      const targetCharacterNo = 140;
+      let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
       let after = "", afterStartIndex = inOriginIndexTo;
-      while (src.text[afterStartIndex] && !/[.?!]/.test(src.text[afterStartIndex])) {
-        if (src.text[afterStartIndex] === ' ' && after.length > maxLineWidth) {
+      while(addedCharacterCount < targetCharacterNo) {
+        if (beforeStartIndex < 0 && afterStartIndex > src.text.length - 1) {
           break;
         }
-        after += src.text[afterStartIndex];
-        afterStartIndex++;
+        if (beforeStartIndex >= 0) {
+          before = src.text[beforeStartIndex] + before;
+          addedCharacterCount ++;
+          beforeStartIndex --;
+        }
+        if (addedCharacterCount >= targetCharacterNo) break;
+        if (afterStartIndex <= src.text.length - 1) {
+          after += src.text[afterStartIndex];
+          afterStartIndex ++;
+          addedCharacterCount ++;
+        }
       }
-      after += after.length > 70 ? " ..." : src.text[afterStartIndex];
+
+      if (beforeStartIndex > 0) {
+        before = before.replace(/^\S*\s/,"... ");
+      } else if (beforeStartIndex === 0) {
+        before = src.text[0] + before;
+      }
+
+      if (afterStartIndex < src.text.length - 1){
+        after = after.replace(/\s+\S*$/, " ...");
+      } else if (afterStartIndex === src.text.length - 1){
+        after += src.text[src.text.length - 1];
+      }
 
       let spans = [];
       let beforeSpan = document.createElement("span");
@@ -215,7 +228,7 @@ class Annogram {
       spans.push(beforeSpan);
       let nextSpan = document.createElement("span");
       nextSpan.classList.add("sourceHighlight");
-      nextSpan.append(next);
+      nextSpan.append(nextForSourceSearch);
       spans.push(nextSpan);
       let afterSpan = document.createElement("span");
       afterSpan.classList.add("sourceText");
