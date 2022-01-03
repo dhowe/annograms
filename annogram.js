@@ -239,7 +239,8 @@ class Annogram {
       //prevent lb on punctuations
       if (i < poem.meta.length - 1 && this.RiTa.isPunct(((poem.meta[i + 1].tokens).slice(cursor - m.start))[0])) {
         if (typeof noBreakWrap === "undefined") {
-          noBreakWrap = document.createElement("nobr");
+          noBreakWrap = document.createElement("span");
+          noBreakWrap.style.wordBreak = "keepall";
         }
         noBreakWrap.append(thisSegment);
       } else if (typeof noBreakWrap !== "undefined") {
