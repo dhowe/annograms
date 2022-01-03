@@ -207,7 +207,7 @@ class Annogram {
       }
 
       if (beforeStartIndex > 0) {
-        before = before.replace(/^\S+\s/,"... ");
+        before = before.replace(/^\S*\s/,"... ");
       } else if (beforeStartIndex === 0) {
         before = src.text[0] + before;
       }
