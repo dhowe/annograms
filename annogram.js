@@ -177,6 +177,7 @@ class Annogram {
       if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
       let sourceDiv = document.createElement("div");
+      sourceDiv.style.wordBreak = "normal";
       sourceDiv.classList.add("source");
       sourceDiv.id = "source" + i;
       let regexStr = next.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
