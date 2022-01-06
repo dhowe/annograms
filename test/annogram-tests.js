@@ -120,6 +120,18 @@ describe('Annograms', function () {
       assert.deepEqual(lines, expected);
     });
 
+    it('should support greedy and lazy annotations', function () {
+      let mm = annogram();
+      let poem = mm.generate(5, { minLength: 10, greedy: true, lazy: true });
+      assert.equal(typeof poem, 'object');
+      assert.equal(typeof poem.lazy, 'object');
+      assert.equal(typeof poem.greedy, 'object');
+      assert.equal(typeof poem.greedy.text, 'string');
+      assert.equal(typeof poem.lazy.text, 'string');
+      assert.ok(Array.isArray(poem.greedy.lines));
+      assert.ok(Array.isArray(poem.lazy.lines));
+    });
+
     it('should handle greedy annotations', function () {
       let mm = annogram();
       let poem = mm.generate(5, { minLength: 10, greedy: true });
