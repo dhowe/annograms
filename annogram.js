@@ -258,6 +258,7 @@ class Annogram {
         if (typeof noBreakWrap === "undefined") {
           noBreakWrap = document.createElement("span");
           noBreakWrap.style.wordBreak = "keep-all";
+          noBreakWrap.style.whiteSpace = "nowrap";
         }
         noBreakWrap.append(thisSegment);
       } else if (typeof noBreakWrap !== "undefined") {
