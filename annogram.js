@@ -255,7 +255,7 @@ class Annogram {
       thisSegment.append(sourceDiv);
       //prevent lb on punctuations
       let nextToks = i < poem.meta.length - 1 ? poem.meta[i + 1].tokens.slice(cursor + toks.length - poem.meta[i + 1].start) : undefined;
-      if (i < poem.meta.length - 1 && this.RiTa.isPunct(this.RiTa.untokenize(nextToks)[0])) {
+      if (nextToks && this.RiTa.isPunct(this.RiTa.untokenize(nextToks)[0])) {
         if (typeof noBreakWrap === "undefined") {
           noBreakWrap = document.createElement("span");
           noBreakWrap.style.wordBreak = "keep-all";
