@@ -253,7 +253,7 @@ class Annogram {
       thisSegment.append(next);
       thisSegment.append(sourceDiv);
       //prevent lb on punctuations
-      if (i < poem.meta.length - 1 && this.RiTa.isPunct(RiTa.untokenize((poem.meta[i + 1].tokens).slice(cursor - poem.meta[i + 1].start))[0])) {
+      if (i < poem.meta.length - 1 && this.RiTa.isPunct(this.RiTa.untokenize((poem.meta[i + 1].tokens).slice(cursor - poem.meta[i + 1].start))[0])) {
         if (typeof noBreakWrap === "undefined") {
           noBreakWrap = document.createElement("span");
           noBreakWrap.style.wordBreak = "keep-all";
