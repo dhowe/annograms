@@ -295,7 +295,8 @@ class Annogram {
       let thisLinePara = document.createElement("p");
       thisLinePara.style.whiteSpace = "pre";
       thisLinePara.style.wordBreak = "keep-all";
-      thisLinePara.append(/^\s+/.exec(line)[0]);
+      let execArr = /^\s+/.exec(line);
+      if (execArr) thisLinePara.append(execArr[0]);
       let textDisplay = document.createElement('a');
       textDisplay.classList.add("meta");
       textDisplay.href = "javascript:void(0)";
