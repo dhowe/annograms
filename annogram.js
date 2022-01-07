@@ -300,7 +300,6 @@ class Annogram {
       thisLinePara.style.whiteSpace = "pre";
       thisLinePara.style.wordBreak = "keep-all";
       thisLinePara.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
-      thisLinePara.style.animation = "fadeIn linear 0.05s";
       let execArr = /^\s+/.exec(line);
       if (execArr) thisLinePara.append(execArr[0]);
       let textDisplay = document.createElement('a');
@@ -380,8 +379,8 @@ class Annogram {
       thisLinePara.append(textDisplay);
 
       targetDiv.append(thisLinePara);
-      //TODO: auto scroll
-      await delay(500);
+      //TODO: auto scroll?
+      await delay(100);
     }
     return
   }
