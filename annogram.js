@@ -288,10 +288,7 @@ class Annogram {
     while(targetDiv.firstChild){
       targetDiv.removeChild(targetDiv.firstChild);
     }
-    targetDiv.classList.add("animatedAnnogram");
-    targetDiv.style.overflowX = "auto";
-    targetDiv.style.animation = "fadeIn linear 0.05s";
-
+    targetDiv.classList.add("displayAnimated");
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const meta = poem.meta[i];
@@ -303,6 +300,7 @@ class Annogram {
       thisLinePara.style.whiteSpace = "pre";
       thisLinePara.style.wordBreak = "keep-all";
       thisLinePara.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
+      thisLinePara.style.animation = "fadeIn linear 0.05s";
       let execArr = /^\s+/.exec(line);
       if (execArr) thisLinePara.append(execArr[0]);
       let textDisplay = document.createElement('a');
