@@ -275,6 +275,115 @@ class Annogram {
 
     return resultDiv;
   }
+
+  async displayAnimated(poem, targetDiv){
+    const delay = function (n){
+      return new Promise(function(resolve){
+          setTimeout(resolve,n);
+      });
+    }
+
+    const lines = this.asLines(poem);
+    if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
+    while(targetDiv.firstChild){
+      targetDiv.removeChild(targetDiv.firstChild);
+    }
+    targetDiv.classList.add("displayAnimated");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const meta = poem.meta[i];
+      if (meta.sourceId < 0) throw Error('TODO: handle sourceId == -1');
+      let src = this.source.find(p => p.id === meta.sourceId);
+      if (!src) throw Error('No source for sourceId #' + meta.sourceId);
+
+      let thisLinePara = document.createElement("p");
+      thisLinePara.style.whiteSpace = "pre";
+      thisLinePara.style.wordBreak = "keep-all";
+      thisLinePara.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
+      let execArr = /^\s+/.exec(line);
+      if (execArr) thisLinePara.append(execArr[0]);
+      let textDisplay = document.createElement('a');
+      textDisplay.classList.add("meta");
+      textDisplay.href = "javascript:void(0)";
+      let txt = line.replace(/^\s+/, "");
+
+      let sourceDiv = document.createElement("div");
+      sourceDiv.style.wordBreak = "normal";
+      sourceDiv.style.whiteSpace = "normal";
+      sourceDiv.classList.add("source");
+      let regexStr = txt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (/[A-Za-z]/.test(txt[0])) regexStr = "(?<![A-Za-z])" + regexStr;
+      if (/[A-Za-z]/.test(txt[txt.length - 1])) regexStr += "(?![A-Za-z])";
+
+      const regex = new RegExp(regexStr);
+      let inOriginIndexFrom = (regex.exec(src.text)) ? (regex.exec(src.text)).index : src.text.indexOf(txt);
+      let inOriginIndexTo = inOriginIndexFrom + txt.length;
+      // 140 characters before and after
+      const targetCharacterNo = 140;
+      let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
+      let after = "", afterStartIndex = inOriginIndexTo;
+      while(addedCharacterCount < targetCharacterNo) {
+        if (beforeStartIndex < 0 && afterStartIndex > src.text.length - 1) {
+          break;
+        }
+        if (beforeStartIndex >= 0) {
+          before = src.text[beforeStartIndex] + before;
+          addedCharacterCount ++;
+          beforeStartIndex --;
+        }
+        if (addedCharacterCount >= targetCharacterNo) break;
+        if (afterStartIndex <= src.text.length - 1) {
+          after += src.text[afterStartIndex];
+          afterStartIndex ++;
+          addedCharacterCount ++;
+        }
+      }
+
+      if (beforeStartIndex > 0) {
+        before = before.replace(/^\S*\s/,"... ");
+      } else if (beforeStartIndex === 0) {
+        before = src.text[0] + before;
+      }
+
+      if (afterStartIndex < src.text.length - 1){
+        after = after.replace(/\s+\S*$/, " ...");
+      } else if (afterStartIndex === src.text.length - 1){
+        after += src.text[src.text.length - 1];
+      }
+
+      let spans = [];
+      let beforeSpan = document.createElement("span");
+      beforeSpan.classList.add("sourceText");
+      beforeSpan.append(before);
+      spans.push(beforeSpan);
+      let nextSpan = document.createElement("span");
+      nextSpan.classList.add("sourceHighlight");
+      nextSpan.append(txt);
+      spans.push(nextSpan);
+      let afterSpan = document.createElement("span");
+      afterSpan.classList.add("sourceText");
+      afterSpan.append(after);
+      spans.push(afterSpan);
+
+      sourceDiv.append(...spans);
+
+      // handle titles starting with 'from'
+      let title = src.title.trim().replace(/^[Ff]rom /, '');
+      let footnotePara = document.createElement("p");
+      footnotePara.classList.add("sourceFootnote");
+      footnotePara.innerHTML = "from <i>" + title + "</i> by " + src.author;
+      sourceDiv.append(footnotePara);
+
+      textDisplay.append(txt);
+      textDisplay.append(sourceDiv);
+      thisLinePara.append(textDisplay);
+
+      targetDiv.append(thisLinePara);
+      //TODO: auto scroll?
+      await delay(100);
+    }
+    return
+  }
 }
 
 Annogram.lb = '<p>';
