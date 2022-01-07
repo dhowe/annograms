@@ -285,10 +285,12 @@ class Annogram {
 
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
-    targetDiv = document.createElement("div");
+    while(targetDiv.firstChild){
+      targetDiv.removeChild(targetDiv.firstChild);
+    }
     targetDiv.classList.add("animatedAnnogram");
     targetDiv.style.overflowX = "auto";
-    targetDiv.style.animation = "fadeIn linear 0.5s";
+    targetDiv.style.animation = "fadeIn linear 0.05s";
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -381,7 +383,7 @@ class Annogram {
 
       targetDiv.append(thisLinePara);
       //TODO: auto scroll
-      await delay(50);
+      await delay(500);
     }
     return
   }
