@@ -285,9 +285,10 @@ class Annogram {
 
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
+    targetDiv = document.createElement("div");
     targetDiv.classList.add("animatedAnnogram");
     targetDiv.style.overflowX = "auto";
-    targetDiv.style.animation = "fadeIn linear 5ms";
+    targetDiv.style.animation = "fadeIn linear 0.5s";
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -295,10 +296,11 @@ class Annogram {
       if (meta.sourceId < 0) throw Error('TODO: handle sourceId == -1');
       let src = this.source.find(p => p.id === meta.sourceId);
       if (!src) throw Error('No source for sourceId #' + meta.sourceId);
-      
+
       let thisLinePara = document.createElement("p");
       thisLinePara.style.whiteSpace = "pre";
       thisLinePara.style.wordBreak = "keep-all";
+      thisLinePara.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
       let execArr = /^\s+/.exec(line);
       if (execArr) thisLinePara.append(execArr[0]);
       let textDisplay = document.createElement('a');
