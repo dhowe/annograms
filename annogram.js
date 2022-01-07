@@ -276,7 +276,7 @@ class Annogram {
     return resultDiv;
   }
 
-  async displayAnimated(poem){
+  async displayAnimated(poem, targetDiv){
     const delay = function (n){
       return new Promise(function(resolve){
           setTimeout(resolve,n);
@@ -285,10 +285,9 @@ class Annogram {
 
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
-    let resultDiv = document.createElement("div");
-    resultDiv.classList.add("animatedAnnogram");
-    resultDiv.style.overflowX = "auto";
-    resultDiv.style.animation = "fadeIn linear 5ms";
+    targetDiv.classList.add("animatedAnnogram");
+    targetDiv.style.overflowX = "auto";
+    targetDiv.style.animation = "fadeIn linear 5ms";
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -373,12 +372,11 @@ class Annogram {
       textDisplay.append(sourceDiv);
       thisLinePara.append(textDisplay);
 
-      resultDiv.append(thisLinePara);
-      yield resultDiv;
+      targetDiv.append(thisLinePara);
       //TODO: auto scroll
       await delay(50);
     }
-    return resultDiv;
+    return
   }
 }
 
