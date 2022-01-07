@@ -292,6 +292,10 @@ class Annogram {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const meta = poem.meta[i];
+      if (meta.sourceId < 0) throw Error('TODO: handle sourceId == -1');
+      let src = this.source.find(p => p.id === meta.sourceId);
+      if (!src) throw Error('No source for sourceId #' + meta.sourceId);
+      
       let thisLinePara = document.createElement("p");
       thisLinePara.style.whiteSpace = "pre";
       thisLinePara.style.wordBreak = "keep-all";
