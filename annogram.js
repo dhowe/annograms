@@ -68,7 +68,7 @@ class Annogram {
         tokens.push(words[i]);
         if (tokens.length === tlen) addMeta(i + count);
       }
-      if (tokens.length) addMeta(words.length - 1);
+      if (tokens.length) addMeta(words.length - 1 + count);
       count += words.length; 
     });
     return poem;
