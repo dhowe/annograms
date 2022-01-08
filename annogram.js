@@ -53,7 +53,7 @@ class Annogram {
     let addMeta = (idx) => {
       let sourceId = -1;
       // skip if we have a single punct token
-      if (idx === words.length - 1 || tokens.length > 1 || !this.RiTa.isPunct(tokens[0])) {
+      if (idx === this.RiTa.tokenize(text).length - 1 || tokens.length > 1 || !this.RiTa.isPunct(tokens[0])) {
         sourceId = this.lookupSource(tokens, { text, index: 0 })[0].id;
         poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
         tokens = [];
