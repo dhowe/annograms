@@ -52,7 +52,9 @@ class Annogram {
 
     let addMeta = (idx) => {
       let sourceId = -1;
-      // skip if we have a single punct token
+      // skip if we have a single punct token that is not last in the sentence
+      // seems to be a one off error here somewhere (see #18)
+      // so that the last token is not always included
       if (idx === this.RiTa.tokenize(text).length - 1 || tokens.length > 1 || !this.RiTa.isPunct(tokens[0])) {
         sourceId = this.lookupSource(tokens, { text, index: 0 })[0].id;
         poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
