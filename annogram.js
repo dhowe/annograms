@@ -276,7 +276,7 @@ class Annogram {
     return resultDiv;
   }
 
-  async displayAnimated(poem, targetDiv){
+  async displayAnimated(poem, targetDiv, delayMs = 300){
     const delay = function (n){
       return new Promise(function(resolve){
           setTimeout(resolve,n);
@@ -296,12 +296,12 @@ class Annogram {
       let src = this.source.find(p => p.id === meta.sourceId);
       if (!src) throw Error('No source for sourceId #' + meta.sourceId);
 
-      let thisLinePara = document.createElement("p");
-      thisLinePara.style.whiteSpace = "pre";
-      thisLinePara.style.wordBreak = "keep-all";
-      thisLinePara.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
+      let thisLineSpan = document.createElement("span");
+      thisLineSpan.style.whiteSpace = "pre";
+      thisLineSpan.style.wordBreak = "keep-all";
+      thisLineSpan.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
       let execArr = /^\s+/.exec(line);
-      if (execArr) thisLinePara.append(execArr[0]);
+      if (execArr) thisLineSpan.append(execArr[0]);
       let textDisplay = document.createElement('a');
       textDisplay.classList.add("meta");
       textDisplay.href = "javascript:void(0)";
@@ -376,11 +376,12 @@ class Annogram {
 
       textDisplay.append(txt);
       textDisplay.append(sourceDiv);
-      thisLinePara.append(textDisplay);
-
-      targetDiv.append(thisLinePara);
+      thisLineSpan.append(textDisplay);
+      targetDiv.append(thisLineSpan);
+      thisLineSpan.animate({opacity: [ 0, 1 ]}, 50);
+      if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
       //TODO: auto scroll?
-      await delay(100);
+      await delay(delayMs);
     }
     return
   }
