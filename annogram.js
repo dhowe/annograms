@@ -46,14 +46,14 @@ class Annogram {
   annotateLazy(lines) {
 
     let text = lines.join(' ');
-    let words = this.RiTa.tokenize(text);
-    let poem = { lines, text, tokens: words, meta: [] };
+    let sections = text.split(Annogram.lb);
+    let poem = { lines, text, tokens: this.RiTa.tokenize(text), meta: [] };
     let tlen = this.model.n - 1, tokens = [];
 
     let addMeta = (idx) => {
       let sourceId = -1;
       // skip if we have a single punct token
-      if (idx === words.length - 1 || tokens.length > 1 || !this.RiTa.isPunct(tokens[0])) {
+      if (idx === this.RiTa.tokenize(text).length - 1 || tokens.length > 1 || !this.RiTa.isPunct(tokens[0])) {
         sourceId = this.lookupSource(tokens, { text, index: 0 })[0].id;
         poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
         tokens = [];
@@ -61,17 +61,16 @@ class Annogram {
       //console.log(`[#${meta.sourceId}]`, this.RiTa.untokenize(tokens));
     }
 
-    for (let i = 0; i < words.length; i++) {
-      if (words[i] === Annogram.lb) {
-        if (tokens.length) addMeta(i);
-      }
-      else {
+    let count = 0;
+    sections.forEach(sec => {
+      let words = this.RiTa.tokenize(sec);
+      for (let i = 0; i < words.length; i++) {
         tokens.push(words[i]);
-        if (tokens.length === tlen) addMeta(i);
+        if (tokens.length === tlen) addMeta(i + count);
       }
-    }
-
-    if (tokens.length) addMeta(words.length - 1); // last phrase
+      if (tokens.length) addMeta(words.length - 1 + count);
+      count += words.length; 
+    });
     return poem;
   }
 
