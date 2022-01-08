@@ -46,7 +46,7 @@ class Annogram {
   annotateLazy(lines) {
 
     let text = lines.join(' ');
-    let words = this.RiTa.tokenize(text);
+    let sections = text.split(Annogram.lb);
     let poem = { lines, text, tokens: words, meta: [] };
     let tlen = this.model.n - 1, tokens = [];
 
@@ -61,21 +61,16 @@ class Annogram {
       //console.log(`[#${meta.sourceId}]`, this.RiTa.untokenize(tokens));
     }
 
-    for (let i = 0; i < words.length; i++) {
-      if (words[i] === Annogram.lb) {
-        if (tokens.length) {
-          addMeta(i - 1);
-          words.splice(i,1); // delete lb
-          i--; // resume correct index
-        }
-      }
-      else {
+    let count = 0;
+    sections.forEach(sec => {
+      let words = this.RiTa.tokenize(sec);
+      for (let i = 0; i < words.length; i++) {
         tokens.push(words[i]);
-        if (tokens.length === tlen) addMeta(i);
+        if (tokens.length === tlen) addMeta(i + count);
       }
-    }
-
-    if (tokens.length) addMeta(words.length - 1); // last phrase
+      if (tokens.length) addMeta(words.length - 1);
+      count += words.length; 
+    });
     return poem;
   }
 
