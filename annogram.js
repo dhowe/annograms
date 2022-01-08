@@ -64,7 +64,7 @@ class Annogram {
     for (let i = 0; i < words.length; i++) {
       if (words[i] === Annogram.lb) {
         if (tokens.length) {
-          addMeta(i);
+          addMeta(i - 1);
           words.splice(i,1); // delete lb
           i--; // resume correct index
         }
