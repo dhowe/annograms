@@ -47,7 +47,7 @@ class Annogram {
 
     let text = lines.join(' ');
     let sections = text.split(Annogram.lb);
-    let poem = { lines, text, tokens: words, meta: [] };
+    let poem = { lines, text, tokens: this.RiTa.tokenize(text), meta: [] };
     let tlen = this.model.n - 1, tokens = [];
 
     let addMeta = (idx) => {
