@@ -276,7 +276,7 @@ class Annogram {
     return resultDiv;
   }
 
-  async displayAnimated(poem, targetDiv, delayMs = 300){
+  async displayAnimated(poem, targetDiv, delayMs = 500, fadeInMs = 100){
     const delay = function (n){
       return new Promise(function(resolve){
           setTimeout(resolve,n);
@@ -289,6 +289,7 @@ class Annogram {
       targetDiv.removeChild(targetDiv.firstChild);
     }
     targetDiv.classList.add("displayAnimated");
+    targetDiv.style.overflowX = "auto";
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const meta = poem.meta[i];
@@ -378,7 +379,7 @@ class Annogram {
       textDisplay.append(sourceDiv);
       thisLineSpan.append(textDisplay);
       targetDiv.append(thisLineSpan);
-      thisLineSpan.animate({opacity: [ 0, 1 ]}, 50);
+      thisLineSpan.animate({opacity: [ 0, 1 ]}, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
       //TODO: auto scroll?
       await delay(delayMs);
