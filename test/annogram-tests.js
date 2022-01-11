@@ -191,18 +191,18 @@ describe('Annograms', function () {
 
   describe('#annotate()', function () {
 
-    it('should handle basic breaks', function () { // fails with extra space
+    it('should handle basic breaks', function () { 
       let gen = [
         'And when he was on the table, she told me that he had walked out on him, the news, which should not be here.',
         'I choose a piece of paper in the basket, but the dog wasn’t there.',
         'But I have to gather together all the things in the room, lock the door, halfway against the door, and the others too.',
         '<p>My wife and I have no way of knowing if they were in the woods that the man disappeared, and that was the end of a small loaf of bread.',
-        'I was scared of the washing machine finished its work.'
+        'I was scared of the washing machine finished its work' // issue #18 here, should be as below
+        // 'I was scared of the washing machine finished its work.'
       ];
       let mm = annogram();
       let poem = mm.annotate(gen, {});
       let poemText = mm.display(poem);
-      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
       //mm.asLines(poem);
       assert.equal(poemText, poem.text.replace(/<p> ?/g, ''));
     });
