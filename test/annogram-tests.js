@@ -1,5 +1,5 @@
 import assert from 'assert';
-import {Annogram} from '../annogram';
+import { Annogram } from '../annogram';
 import poems from '../poems.js';
 import RiTa from 'rita';
 
@@ -140,7 +140,52 @@ describe('Annograms', function () {
       mm.asLines(poem);
       assert.equal(poem.text.startsWith(poem.meta[0].tokens[0]), true,
         'poem start: ' + poem.text.slice(0, 20) + ' != ' + poem.meta[0].tokens[0]);
-        // TODO: better tests
+      // TODO: better tests
+    });
+
+    it('should recreate lazy from greedy', function () {
+
+      let gen = ['I will step out of the city.', '<p>My wife came in from the kitchen.',];
+      let tokens = RiTa.tokenize(gen.join(''));
+      let meta = [
+        { tokens: ['I', 'will', 'step', 'out', 'of'], sourceId: 211, start: 0 },
+        { tokens: ['step', 'out', 'of', 'the'], sourceId: 101, start: 2 },
+        { tokens: ['out', 'of', 'the', 'city'], sourceId: 205, start: 3 },
+        { tokens: ['of', 'the', 'city', '.'], sourceId: 89, start: 4 },
+        { tokens: ['My', 'wife', 'came', 'in', 'from', 'the', 'kitchen', '.'], sourceId: 191, start: 9 }
+      ];
+
+      let lazyMeta = lazyFromGreedy(meta);
+      let str = lazyMeta.reduce((acc, c, i, a) => acc + RiTa.untokenize(c.tokens.slice(0, c.end + 1 - c.start)) + (i < a.length - 1 ? ' ' : ''), '');
+      //console.log(str);
+      assert.equal(gen.join(' ').replace('<p>', ''), str);
+
+      function lazyFromGreedy(meta) {
+
+        function findNext() {
+          let next;
+          for (let i = meta.length - 1; i >= 0; i--) {
+            if (cursor >= meta[i].start) {
+              next = meta[i];
+              return next;
+            }
+          }
+          throw Error('done');
+        }
+
+        let next, last, cursor = 0, result = [];
+        while (cursor < tokens.length - 1) {
+          last = next;
+          next = findNext(cursor);
+          let overlap = cursor - next.start;
+          if (last) last.end -= overlap;
+          result.push(next);
+          cursor += next.tokens.length;
+          next.end = cursor - 1;
+        }
+        return result;
+      }
+
     });
   });
 
