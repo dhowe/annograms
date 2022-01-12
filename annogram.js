@@ -3,7 +3,6 @@
 class Annogram {
 
   constructor(n, poems, opts = {}) {
-
     this.source = poems;
     this.RiTa = opts.RiTa || RiTa;
     opts.text = poems.map(p => p.text).join(Annogram.lb);
@@ -357,5 +356,6 @@ class Annogram {
 }
 
 Annogram.lb = '<p>';
+Annogram.VERSION = '0.15'; // update each commit
 
 export { Annogram };
