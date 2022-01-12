@@ -1,4 +1,4 @@
-//import RiTa from 'rita';
+import {version} from './package.json';
 
 class Annogram {
 
@@ -356,6 +356,6 @@ class Annogram {
 }
 
 Annogram.lb = '<p>';
-Annogram.VERSION = '0.15'; // update each commit
+Annogram.VERSION = version;
 
 export { Annogram };
