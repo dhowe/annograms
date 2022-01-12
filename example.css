@@ -1,7 +1,7 @@
 .animatedLine{
   white-space: pre;
   word-break: keep-all;
-  font-family: "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
+  font-family: Consolas,Monaco,'Lucida Console','Liberation Mono','DejaVu Sans Mono','Bitstream Vera Sans Mono','Courier New';
 }
 
 .meta{
