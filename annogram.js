@@ -113,7 +113,7 @@ class Annogram {
     return result;
   }
 
-  asHtml(poem) { // TODO: remove styling
+  asHtml(poem) { 
     let cursor = 0;
     let resultDiv = document.createElement("div");
     resultDiv.classList.add("display");
@@ -135,8 +135,8 @@ class Annogram {
       if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
       let sourceDiv = document.createElement("div");
-      sourceDiv.style.wordBreak = "normal";
-      sourceDiv.style.whiteSpace = "normal";
+      // sourceDiv.style.wordBreak = "normal";
+      // sourceDiv.style.whiteSpace = "normal";
       sourceDiv.classList.add("source");
       sourceDiv.id = "source" + i;
       let regexStr = nextForSourceSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -213,8 +213,9 @@ class Annogram {
       if (nextToks && this.RiTa.isPunct(this.RiTa.untokenize(nextToks)[0])) {
         if (typeof noBreakWrap === "undefined") {
           noBreakWrap = document.createElement("span");
-          noBreakWrap.style.wordBreak = "keep-all";
-          noBreakWrap.style.whiteSpace = "nowrap";
+          noBreakWrap.classList.add("noBreakWrap");
+          // noBreakWrap.style.wordBreak = "keep-all";
+          // noBreakWrap.style.whiteSpace = "nowrap";
         }
         noBreakWrap.append(thisSegment);
       } else if (typeof noBreakWrap !== "undefined") {
