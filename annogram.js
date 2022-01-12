@@ -1,5 +1,3 @@
-import {version} from './package.json';
-
 class Annogram {
 
   constructor(n, poems, opts = {}) {
@@ -356,6 +354,6 @@ class Annogram {
 }
 
 Annogram.lb = '<p>';
-Annogram.VERSION = version;
+Annogram.VERSION = '0.12'//version; import {version} from './package.json';
 
 export { Annogram };
