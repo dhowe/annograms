@@ -1,0 +1,53 @@
+.animatedLine{
+  white-space: pre;
+  word-break: keep-all;
+  font-family: "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
+}
+
+.meta{
+  position: relative;
+  display: inline-block;
+}
+
+.meta:hover .source {
+  visibility: visible;
+}
+
+.display{
+  width:800px
+}
+
+.noBreakWrap{
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
+.source{
+  word-break: normal;
+  white-space: normal;
+  color: black;
+  visibility: hidden;
+  text-align: left;
+  background: #D7D7D7;
+  width: 350%;
+  min-width: 200px;
+  max-width: 250px;
+  font-size: small;
+  padding: 10px 10px 0px 10px;
+  border-radius: 10px;
+  border: 1px solid #b7b7b7;
+  position: absolute;
+  z-index: 1;
+  top: 100%;
+  left: 0%;
+}
+
+.sourceHighlight{
+  background:rgb(215, 170, 200)
+}
+
+.sourceFootnote{
+  font-size: xx-small;
+  text-align: right;
+  padding-bottom: 0px;
+}
