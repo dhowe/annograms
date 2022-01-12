@@ -5,18 +5,221 @@ import RiTa from 'rita';
 
 describe('Annograms', function () {
   this.timeout(20000);
+  this.slow(2000);
+
+
+  describe('#annotate()', function () {
+
+    it('should handle basic breaks', function () {
+      let gen = [
+        'And when he was on the table, she told me that he had walked out on him, the news, which should not be here.',
+        'I choose a piece of paper in the basket, but the dog wasn’t there.',
+        'But I have to gather together all the things in the room, lock the door, halfway against the door, and the others too.',
+        '<p>My wife and I have no way of knowing if they were in the woods that the man disappeared, and that was the end of a small loaf of bread.',
+        'I was scared of the washing machine finished its work' // issue #18 here, should be as below
+        // 'I was scared of the washing machine finished its work.'
+      ];
+      let mm = annogram();
+      let poem = mm.annotate(gen, {});
+      let poemText = mm.asText(poem);
+      //mm.asLines(poem);
+      assert.equal(poemText, poem.text.replace('<p>', ''));
+    });
+
+
+    it('should annotate ending punctuation', function () {
+      let gen = [
+        'Her arms moved up now, no one knows, perhaps not at all, but a dream of you.',
+        '<p>I was sitting at the table, she told me that I should not know.',
+      ];
+      let mm = annogram();
+      let poem = mm.annotate(gen);
+      //console.log(poem.meta);
+      //assert.equal(1,2);
+      let expected = [
+        {
+          tokens: ['Her', 'arms', 'moved', 'up', 'now', ','],
+          sourceId: 95,
+          start: 0,
+          end: 2
+        },
+        {
+          tokens: ['up', 'now', ',', 'no', 'one', 'knows'],
+          sourceId: 484,
+          start: 3,
+          end: 5
+        },
+        {
+          tokens: ['no', 'one', 'knows', ',', 'perhaps', 'not'],
+          sourceId: 491,
+          start: 6,
+          end: 8
+        },
+        {
+          tokens: [',', 'perhaps', 'not', 'at', 'all', ','],
+          sourceId: 412,
+          start: 9,
+          end: 11
+        },
+        {
+          tokens: ['at', 'all', ',', 'but', 'a'],
+          sourceId: 192,
+          start: 12,
+          end: 13
+        },
+        {
+          tokens: [',', 'but', 'a', 'dream', 'of'],
+          sourceId: 88,
+          start: 14,
+          end: 15
+        },
+        {
+          tokens: ['a', 'dream', 'of', 'you', '.'],
+          sourceId: 322,
+          start: 16,
+          end: 21
+        },
+        {
+          tokens: ['I', 'was', 'sitting', 'at', 'the'],
+          sourceId: 396,
+          start: 22,
+          end: 23
+        },
+        {
+          tokens: ['sitting', 'at', 'the', 'table', ','],
+          sourceId: 17,
+          start: 24,
+          end: 25
+        },
+        {
+          tokens: ['the', 'table', ',', 'she'],
+          sourceId: 456,
+          start: 26,
+          end: 26
+        },
+        {
+          tokens: ['table', ',', 'she', 'told', 'me'],
+          sourceId: 473,
+          start: 27,
+          end: 28
+        },
+        {
+          tokens: ['she', 'told', 'me', 'that'],
+          sourceId: 473,
+          start: 29,
+          end: 29
+        },
+        {
+          tokens: ['told', 'me', 'that', 'I', 'should'],
+          sourceId: 356,
+          start: 30,
+          end: 31
+        },
+        {
+          tokens: ['that', 'I', 'should', 'not'],
+          sourceId: 137,
+          start: 32,
+          end: 32
+        },
+        {
+          tokens: ['I', 'should', 'not', 'know', '.'],
+          sourceId: 131,
+          start: 33,
+          end: 37
+        }
+      ];
+      // for (let i = 0; i < expected.length; i++) {
+      //   console.log('checking '+i+' ---------------------');
+      //   assert.deepEqual(poem.meta[i],expected[i]);
+      // }
+      assert.deepEqual(expected, poem.meta);
+    });
+
+    it('should annotate across sources1', function () {
+      let gen = [
+        'I will step out of the city.',
+        '<p>My wife came in from the kitchen.',
+      ];
+      let mm = annogram();
+      let poem = mm.annotate(gen);
+      let poemText = mm.asText(poem);
+      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.asText(poem, 1));
+      //mm.asLines(poem);
+      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
+    });
+
+    it('should annotate across sources2', function () {
+      let gen = [
+        'He had been chasing the sound of the truck',
+        '<p>A man and a woman, and the way it began.',
+      ]
+      let mm = annogram();
+      let poem = mm.annotate(gen);
+      let poemText = mm.asText(poem);
+      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.asText(poem, 1));
+      //mm.asLines(poem);
+      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
+    });
+
+    it('should annotate across sources3', function () {
+      let gen = ['It was not a sparrow, he was alive.', 'He took one of them'];
+      let mm = annogram();
+      let poem = mm.annotate(gen);
+      let poemText = mm.asText(poem);
+      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.asText(poem, 1));
+      //mm.asLines(poem);
+      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
+    });
+
+    it('should annotate across sources4', function () {
+      let gen = [
+        'There is no plan in the future; I see he has to love you.',
+        'I look at his ass his old man ass look at his face.',
+        'He is the old witch in the woods behind us.',
+        'We were at the window, all the people on the street outside the window, but it seemed to me, but, I think, the ones made of words.',
+        'I was hungry and I wanted to tell her you have an appointment?'
+      ];
+      let mm = annogram();
+      let poem = mm.annotate(gen);
+      let poemText = mm.asText(poem);
+      //console.log(poem.meta);
+      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.asText(poem, 1));
+      //mm.asLines(poem);
+      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
+    });
+  });
+
+  describe('#asText()', function () {
+
+    it('should match provided poem text', function () {
+      let gen = [
+        'Her arms moved up now, no one knows, perhaps not at all, but a dream of you.',
+        '<p>I was sitting at the table, she told me that I should not know.',
+      ];
+      let mm = annogram();
+      let poem = mm.annotate(gen);
+      let poemText = mm.asText(poem);
+      assert.equal(poemText, poem.text.replace('<p>', ''));
+    });
+
+    it('should match generated poem text', function () {
+      let mm = annogram();
+      let poem = mm.generate(5, { minLength: 10 });
+      assert.equal(mm.asText(poem), poem.text.replace('<p>', ''));
+    });
+  });
 
   describe('#asLines()', function () {
 
-    it('should handle lineation', function () {
+    it('should compute lines for poem', function () {
       let gen = [
         'The ice-machine couldn’t keep up, and I was going to die.',
         'The result is not a planet, but a woman, and the daughter of the house.',
       ];
       let mm = annogram();
-      let poem = mm.annotateGreedy(gen);
+      let poem = mm.annotate(gen);
       let pl = mm.asLines(poem);
-      //console.log(pl);
+
       let expected = [
         'The ice-machine couldn’t keep up',
         '                couldn’t keep up, and',
@@ -35,40 +238,17 @@ describe('Annograms', function () {
         '                                                     the daughter of the house',
         '                                                                  of the house.'
       ];
+      //console.log(poem.meta.length, expected.length);
       assert.deepEqual(pl, expected);
     });
-
-    it('should handle punctuation', function () {
-      let gen = ['The ice-machine couldn’t keep up, and I was going to die.'];
-      let mm = annogram();
-      let poem = mm.annotateGreedy(gen);
-      let pl = mm.asLines(poem);
-      //console.log(pl);
-      let expected = [
-        'The ice-machine couldn’t keep up',
-        '                couldn’t keep up, and',
-        '                              up, and I',
-        '                                  and I was going to',
-        '                                        was going to die',
-        '                                            going to die.'
-      ];
-      assert.deepEqual(pl, expected);
-    });
-  });
-
-  describe('#annotateGreedy()', function () {
-
-    it('should handle greedy breaks', function () {
+    it('should handle line breaks without sources', function () {
       let gen = [
         'Her arms moved up now, no one knows, perhaps not at all, but a dream of you.',
         '<p>I was sitting at the table, she told me that I should not know.',
       ];
       let mm = annogram();
-      let poem = mm.annotate(gen, { greedy: true });
-      //console.log('\n' + poem.text + '\n\n' + mm.display(poem) + '\n\n' + mm.display(poem, 1));
+      let poem = mm.annotate(gen);
       let lines = mm.asLines(poem);
-      //console.log(lines);
-
       let expected = [
         'Her arms moved up now,',
         '               up now, no one knows',
@@ -89,17 +269,15 @@ describe('Annograms', function () {
       assert.deepEqual(lines, expected);
     });
 
-    it('should handle greedy breaks with source', function () {
+
+    it('should handle line breaks with sources', function () {
       let gen = [
         'Her arms moved up now, no one knows, perhaps not at all, but a dream of you.',
         '<p>I was sitting at the table, she told me that I should not know.',
       ];
       let mm = annogram();
-      let poem = mm.annotate(gen, { greedy: true });
-      let poemText = mm.display(poem);
-      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
+      let poem = mm.annotate(gen);
       let lines = mm.asLines(poem, { addSources: true });
-      //console.log(lines);
       let expected = [
         'Her arms moved up now, [#95]',
         '               up now, no one knows [#484]',
@@ -119,159 +297,23 @@ describe('Annograms', function () {
       ]
       assert.deepEqual(lines, expected);
     });
-
-    it('should support greedy and lazy annotations', function () {
+    it('should handle punctuation', function () {
+      let gen = ['The ice-machine couldn’t keep up, and I was going to die.'];
       let mm = annogram();
-      let poem = mm.generate(5, { minLength: 10, greedy: true, lazy: true });
-      assert.equal(typeof poem, 'object');
-      assert.equal(typeof poem.lazy, 'object');
-      assert.equal(typeof poem.greedy, 'object');
-      assert.equal(typeof poem.greedy.text, 'string');
-      assert.equal(typeof poem.lazy.text, 'string');
-      assert.ok(Array.isArray(poem.greedy.lines));
-      assert.ok(Array.isArray(poem.lazy.lines));
-    });
-
-    it('should handle greedy annotations', function () {
-      let mm = annogram();
-      let poem = mm.generate(5, { minLength: 10, greedy: true });
-      //console.log(poem.lines);
-      //console.log('\n' + poem.text + '\n\n' + mm.display(poem) + '\n\n' + mm.display(poem, 1));
-      mm.asLines(poem);
-      assert.equal(poem.text.startsWith(poem.meta[0].tokens[0]), true,
-        'poem start: ' + poem.text.slice(0, 20) + ' != ' + poem.meta[0].tokens[0]);
-      // TODO: better tests
-    });
-
-    it('should recreate lazy from greedy', function () {
-
-      let gen = ['I will step out of the city.', '<p>My wife came in from the kitchen.',];
-      let tokens = RiTa.tokenize(gen.join(''));
-      let meta = [
-        { tokens: ['I', 'will', 'step', 'out', 'of'], sourceId: 211, start: 0 },
-        { tokens: ['step', 'out', 'of', 'the'], sourceId: 101, start: 2 },
-        { tokens: ['out', 'of', 'the', 'city'], sourceId: 205, start: 3 },
-        { tokens: ['of', 'the', 'city', '.'], sourceId: 89, start: 4 },
-        { tokens: ['My', 'wife', 'came', 'in', 'from', 'the', 'kitchen', '.'], sourceId: 191, start: 9 }
+      let poem = mm.annotate(gen);
+      let pl = mm.asLines(poem);
+      let expected = [
+        'The ice-machine couldn’t keep up',
+        '                couldn’t keep up, and',
+        '                              up, and I',
+        '                                  and I was going to',
+        '                                        was going to die',
+        '                                            going to die.'
       ];
-
-      let lazyMeta = lazyFromGreedy(meta);
-      let str = lazyMeta.reduce((acc, c, i, a) => acc + RiTa.untokenize(c.tokens.slice(0, c.end + 1 - c.start)) + (i < a.length - 1 ? ' ' : ''), '');
-      //console.log(str);
-      assert.equal(gen.join(' ').replace('<p>', ''), str);
-
-      function lazyFromGreedy(meta) {
-
-        function findNext() {
-          let next;
-          for (let i = meta.length - 1; i >= 0; i--) {
-            if (cursor >= meta[i].start) {
-              next = meta[i];
-              return next;
-            }
-          }
-          throw Error('done');
-        }
-
-        let next, last, cursor = 0, result = [];
-        while (cursor < tokens.length - 1) {
-          last = next;
-          next = findNext(cursor);
-          let overlap = cursor - next.start;
-          if (last) last.end -= overlap;
-          result.push(next);
-          cursor += next.tokens.length;
-          next.end = cursor - 1;
-        }
-        return result;
-      }
-
+      assert.deepEqual(pl, expected);
     });
   });
 
-  describe('#annotate()', function () {
-
-    it('should handle basic breaks', function () { 
-      let gen = [
-        'And when he was on the table, she told me that he had walked out on him, the news, which should not be here.',
-        'I choose a piece of paper in the basket, but the dog wasn’t there.',
-        'But I have to gather together all the things in the room, lock the door, halfway against the door, and the others too.',
-        '<p>My wife and I have no way of knowing if they were in the woods that the man disappeared, and that was the end of a small loaf of bread.',
-        'I was scared of the washing machine finished its work' // issue #18 here, should be as below
-        // 'I was scared of the washing machine finished its work.'
-      ];
-      let mm = annogram();
-      let poem = mm.annotate(gen, {});
-      let poemText = mm.display(poem);
-      //mm.asLines(poem);
-      assert.equal(poemText, poem.text.replace(/<p> ?/g, ''));
-    });
-
-    it('should generate correct annotations', function () {
-      let mm = annogram();
-      let poem = mm.generate(5, { minLength: 10 });
-      //console.log(poem.lines);
-      let poemText = mm.display(poem);
-      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
-      assert.equal(poem.text.startsWith(poem.meta[0].tokens[0]), true,
-        'poem start: ' + poem.text.slice(0, 20) + ' != ' + poem.meta[0].tokens[0]);
-      // TODO: better test
-      //assert.equal(1,2);
-    });
-
-    it('should annotate across sources1', function () {
-      let gen = [
-        'I will step out of the city.',
-        '<p>My wife came in from the kitchen.',
-      ];
-      let mm = annogram();
-      let poem = mm.annotate(gen);
-      let poemText = mm.display(poem);
-      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
-      //mm.asLines(poem);
-      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
-    });
-
-    it('should annotate across sources2', function () {
-      let gen = [
-        'He had been chasing the sound of the truck',
-        '<p>A man and a woman, and the way it began.',
-      ]
-      let mm = annogram();
-      let poem = mm.annotate(gen);
-      let poemText = mm.display(poem);
-      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
-      //mm.asLines(poem);
-      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
-    });
-
-    it('should annotate across sources3', function () {
-      let gen = ['It was not a sparrow, he was alive.', 'He took one of them'];
-      let mm = annogram();
-      let poem = mm.annotate(gen);
-      let poemText = mm.display(poem);
-      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
-      //mm.asLines(poem);
-      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
-    });
-
-    it('should annotate across sources4', function () {
-      let gen = [
-        'There is no plan in the future; I see he has to love you.',
-        'I look at his ass his old man ass look at his face.',
-        'He is the old witch in the woods behind us.',
-        'We were at the window, all the people on the street outside the window, but it seemed to me, but, I think, the ones made of words.',
-        'I was hungry and I wanted to tell her you have an appointment?'
-      ];
-      let mm = annogram();
-      let poem = mm.annotate(gen);
-      let poemText = mm.display(poem);
-      //console.log(poem.meta);
-      //console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.display(poem, 1));
-      //mm.asLines(poem);
-      assert.equal(poemText, poem.text.replace(/<p>/g, ''));
-    });
-  });
   function annogram() {
     return new Annogram(4, poems, { maxLengthMatch: 7, RiTa });
   }

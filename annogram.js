@@ -13,76 +13,29 @@ class Annogram {
       .filter(s => /^[A-Z]/.test(s));
   }
 
-  display(poem, addSources) {
-    let str = '';
-    for (let i = 0; i < poem.meta.length; i++) {
-      let m = poem.meta[i];
-      let diff = m.tokens.length;
-      if (i < poem.meta.length - 1) {
-        let nextStart = poem.meta[i + 1].start;
-        diff = nextStart - m.start;
-      }
-      let toks = m.tokens.slice(0, diff);
-      let next = this.RiTa.untokenize(toks);
-      if (str.length && !this.RiTa.isPunct(next[0])) str += ' ';
-      str += next + (addSources ? `[#${m.sourceId}]` : '');
-    }
-    return str;
+  asText(poem, addSources) {
+    return poem.meta.reduce((acc, c, i, a) => {
+      let toks = c.tokens.slice(0, c.end - c.start + 1);
+      if (this.RiTa.isPunct(toks[0])) acc = acc.trim();
+      return acc + this.RiTa.untokenize(toks)
+        + (addSources ? '[#' + c.sourceId + ']' : '')
+        + (i < a.length - 1 ? ' ' : '');
+    }, '');
   }
 
   generate(num, opts = { minLength: 8, greedy: 0 }) {
-    let gen = this.model.generate(num, opts);
-    //gen.forEach((g, i) => console.log(i + ") " + g));
-    return this.annotate(gen, opts);
+    let poem = this.model.generate(num, opts);
+    return this.annotate(poem, opts);
   }
 
-  annotate(lines, opts = {}) {
-    if (opts.greedy && opts.lazy) return {
-      greedy: this.annotateGreedy(lines), lazy: this.annotateLazy(lines)
-    };
-    return opts.greedy ? this.annotateGreedy(lines) : this.annotateLazy(lines);
-  }
+  annotate(lines) {
 
-  annotateLazy(lines) {
-
-    let text = lines.join(' ');
-    let sections = text.split(Annogram.lb);
-    let poem = { lines, text, tokens: this.RiTa.tokenize(text), meta: [] };
-    let tlen = this.model.n - 1, tokens = [];
-
-    let addMeta = (idx) => {
-      let sourceId = -1;
-      // skip if we have a single punct token that is not last in the sentence
-      // seems to be a one off error here somewhere (see #18)
-      // so that the last token is not always included
-      if (idx === this.RiTa.tokenize(text).length - 1 || tokens.length > 1 || !this.RiTa.isPunct(tokens[0])) {
-        sourceId = this.lookupSource(tokens, { text, index: 0 })[0].id;
-        poem.meta.push({ sourceId, tokens, start: (idx - tokens.length) + 1 });
-        tokens = [];
-      }
-      //console.log(`[#${meta.sourceId}]`, this.RiTa.untokenize(tokens));
-    }
-
-    let count = 0;
-    sections.forEach(sec => {
-      let words = this.RiTa.tokenize(sec);
-      for (let i = 0; i < words.length; i++) {
-        tokens.push(words[i]);
-        if (tokens.length === tlen) addMeta(i + count);
-      }
-      if (tokens.length) addMeta(words.length - 1 + count);
-      count += words.length; 
-    });
-    return poem;
-  }
-
-  annotateGreedy(lines) {
     let n = this.model.n, dbug = true;
     let text = lines.join(' ');
     let words = this.RiTa.tokenize(text);
     let tokens = words.slice(0, n);
     let poem = { lines, text, tokens: words, meta: [] };
-    let src = this.lookupSource(tokens, { text, index: 0 })[0];
+    let src = this._lookupSource(tokens, { text, index: 0 })[0];
 
     let addMeta = (idx) => {
       poem.meta.push({
@@ -94,13 +47,23 @@ class Annogram {
       tokens = [];
     }
 
+    const appendEndMarkers = () => {
+      let meta = poem.meta, next;
+      for (let i = 0; i < meta.length - 1; i++) {
+        let curr = meta[i];
+        next = meta[i + 1];
+        curr.end = next.start - 1;
+      }
+      next.end = next.start + next.tokens.length - 1;
+    }
+
     for (let i = n; i < words.length; i++) {
 
       if (words[i] === Annogram.lb) {
         if (tokens.length) addMeta(i);
         i++; // skip the LB
         tokens = words.slice(i, i + n);
-        src = this.lookupSource(tokens, { text, index: i })[0];
+        src = this._lookupSource(tokens, { text, index: i })[0];
         i += n;
       }
 
@@ -111,22 +74,15 @@ class Annogram {
         addMeta(i);
 
         // find n-length source for the next phrase
-        src = this.lookupSource(tokens = next, { text, index: i })[0];
+        src = this._lookupSource(tokens = next, { text, index: i })[0];
       }
     }
 
     if (tokens.length) addMeta(words.length);
 
-    return poem;
-  }
+    appendEndMarkers();
 
-  lookupSource(tokens, dbugInfo) {
-    let phrase = this.RiTa.untokenize(tokens);
-    let srcs = this.source.filter(p => p.text.includes(phrase));
-    if (!srcs || !srcs.length) throw Error(`(${dbugInfo.index}) `
-      + `No source for "${phrase}"\n\n${dbugInfo.text}`);
-    srcs.sort((a, b) => a.id - b.id);
-    return srcs;
+    return poem;
   }
 
   asLines(poem, { addSources = false/*, maxLineLength = 60*/ } = {}) {
@@ -160,7 +116,7 @@ class Annogram {
     return result;
   }
 
-  displayHtml(poem) {
+  asHtml(poem) { // TODO: remove styling
     let cursor = 0;
     let resultDiv = document.createElement("div");
     resultDiv.classList.add("display");
@@ -197,32 +153,32 @@ class Annogram {
       const targetCharacterNo = 140;
       let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
       let after = "", afterStartIndex = inOriginIndexTo;
-      while(addedCharacterCount < targetCharacterNo) {
+      while (addedCharacterCount < targetCharacterNo) {
         if (beforeStartIndex < 0 && afterStartIndex > src.text.length - 1) {
           break;
         }
         if (beforeStartIndex >= 0) {
           before = src.text[beforeStartIndex] + before;
-          addedCharacterCount ++;
-          beforeStartIndex --;
+          addedCharacterCount++;
+          beforeStartIndex--;
         }
         if (addedCharacterCount >= targetCharacterNo) break;
         if (afterStartIndex <= src.text.length - 1) {
           after += src.text[afterStartIndex];
-          afterStartIndex ++;
-          addedCharacterCount ++;
+          afterStartIndex++;
+          addedCharacterCount++;
         }
       }
 
       if (beforeStartIndex > 0) {
-        before = before.replace(/^\S*\s/,"... ");
+        before = before.replace(/^\S*\s/, "... ");
       } else if (beforeStartIndex === 0) {
         before = src.text[0] + before;
       }
 
-      if (afterStartIndex < src.text.length - 1){
+      if (afterStartIndex < src.text.length - 1) {
         after = after.replace(/\s+\S*$/, " ...");
-      } else if (afterStartIndex === src.text.length - 1){
+      } else if (afterStartIndex === src.text.length - 1) {
         after += src.text[src.text.length - 1];
       }
 
@@ -255,7 +211,8 @@ class Annogram {
       thisSegment.append(next);
       thisSegment.append(sourceDiv);
       //prevent lb on punctuations
-      let nextToks = i < poem.meta.length - 1 ? poem.meta[i + 1].tokens.slice(cursor + toks.length - poem.meta[i + 1].start) : undefined;
+      let nextToks = i < poem.meta.length - 1 ? poem.meta[i + 1].tokens.slice
+        (cursor + toks.length - poem.meta[i + 1].start) : undefined;
       if (nextToks && this.RiTa.isPunct(this.RiTa.untokenize(nextToks)[0])) {
         if (typeof noBreakWrap === "undefined") {
           noBreakWrap = document.createElement("span");
@@ -277,16 +234,17 @@ class Annogram {
     return resultDiv;
   }
 
-  async displayAnimated(poem, targetDiv, delayMs = 500, fadeInMs = 100){
-    const delay = function (n){
-      return new Promise(function(resolve){
-          setTimeout(resolve,n);
+  // TODO: re-implement with new annotations, remove styling, add options parameter
+  async asLineAnimation(poem, targetDiv, delayMs = 500, fadeInMs = 100) {
+    const delay = function (n) {
+      return new Promise(function (resolve) {
+        setTimeout(resolve, n);
       });
     }
 
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
-    while(targetDiv.firstChild){
+    while (targetDiv.firstChild) {
       targetDiv.removeChild(targetDiv.firstChild);
     }
     targetDiv.classList.add("displayAnimated");
@@ -318,38 +276,39 @@ class Annogram {
       if (/[A-Za-z]/.test(txt[txt.length - 1])) regexStr += "(?![A-Za-z])";
 
       const regex = new RegExp(regexStr);
-      let inOriginIndexFrom = (regex.exec(src.text)) ? (regex.exec(src.text)).index : src.text.indexOf(txt);
+      let inOriginIndexFrom = (regex.exec(src.text))
+        ? (regex.exec(src.text)).index : src.text.indexOf(txt);
       let inOriginIndexTo = inOriginIndexFrom + txt.length;
       // 140 characters before and after
       const targetCharacterNo = 140;
       let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
       let after = "", afterStartIndex = inOriginIndexTo;
-      while(addedCharacterCount < targetCharacterNo) {
+      while (addedCharacterCount < targetCharacterNo) {
         if (beforeStartIndex < 0 && afterStartIndex > src.text.length - 1) {
           break;
         }
         if (beforeStartIndex >= 0) {
           before = src.text[beforeStartIndex] + before;
-          addedCharacterCount ++;
-          beforeStartIndex --;
+          addedCharacterCount++;
+          beforeStartIndex--;
         }
         if (addedCharacterCount >= targetCharacterNo) break;
         if (afterStartIndex <= src.text.length - 1) {
           after += src.text[afterStartIndex];
-          afterStartIndex ++;
-          addedCharacterCount ++;
+          afterStartIndex++;
+          addedCharacterCount++;
         }
       }
 
       if (beforeStartIndex > 0) {
-        before = before.replace(/^\S*\s/,"... ");
+        before = before.replace(/^\S*\s/, "... ");
       } else if (beforeStartIndex === 0) {
         before = src.text[0] + before;
       }
 
-      if (afterStartIndex < src.text.length - 1){
+      if (afterStartIndex < src.text.length - 1) {
         after = after.replace(/\s+\S*$/, " ...");
-      } else if (afterStartIndex === src.text.length - 1){
+      } else if (afterStartIndex === src.text.length - 1) {
         after += src.text[src.text.length - 1];
       }
 
@@ -380,13 +339,21 @@ class Annogram {
       textDisplay.append(sourceDiv);
       thisLineSpan.append(textDisplay);
       targetDiv.append(thisLineSpan);
-      thisLineSpan.animate({opacity: [ 0, 1 ]}, fadeInMs);
+      thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
       //TODO: auto scroll?
       await delay(delayMs);
     }
-    return
   }
+  _lookupSource(tokens, dbugInfo) {
+    let phrase = this.RiTa.untokenize(tokens);
+    let srcs = this.source.filter(p => p.text.includes(phrase));
+    if (!srcs || !srcs.length) throw Error(`(${dbugInfo.index}) `
+      + `No source for "${phrase}"\n\n${dbugInfo.text}`);
+    srcs.sort((a, b) => a.id - b.id);
+    return srcs;
+  }
+
 }
 
 Annogram.lb = '<p>';
