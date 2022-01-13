@@ -235,8 +235,12 @@ class Annogram {
   asLineAnimation(poem, opts={}){
     let targetDiv = document.createElement("div");
     targetDiv.classList.add("asLineAnimationContainer");
-    let height = opts.divHeight || 500;
+    let width = opts.width || 800;
+    let height = opts.height || 500;
+    targetDiv.style.height = height + "px";
     targetDiv.style.maxHeight = height + 'px';
+    targetDiv.style.width = width + "px";
+    targetDiv.style.maxWidth = width + 'px';
     this._animation(poem, targetDiv, opts);
     return targetDiv;
   }

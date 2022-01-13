@@ -30,6 +30,7 @@
 }
 
 .source{
+  line-height: normal;
   word-break: normal;
   white-space: normal;
   color: black;
