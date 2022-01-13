@@ -242,7 +242,6 @@ class Annogram {
     return targetDiv;
   }
 
-  // TODO: re-implement with new annotations, remove styling, add options parameter
   async _animation(poem, targetDiv, opts={}) {
     let delayMs = opts.delayMs || 500;
     let fadeInMs = opts.fadeInMs || 100;
@@ -261,7 +260,6 @@ class Annogram {
       if (debug) console.log(ctx.font);
       let no = 1;
       while((ctx.measureText(' '.repeat(no)).width) < w * 0.8 ) {
-        //if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + w);
         no ++;
       }
       return no;
