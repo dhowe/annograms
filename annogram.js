@@ -237,6 +237,7 @@ class Annogram {
     targetDiv.style.maxHeight = height + 'px';
     targetDiv.style.width = width + "px";
     targetDiv.style.maxWidth = width + 'px';
+    opts.width = width;
     this._animation(poem, targetDiv, opts);
     return targetDiv;
   }
@@ -253,16 +254,14 @@ class Annogram {
       });
     }
 
-    const calculateMaxCharacterNoPerLine = function(div, debug) {
+    const calculateMaxCharacterNoPerLine = function(div, w, debug) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext('2d');
       ctx.font = window.getComputedStyle(div).getPropertyValue("font-size") + " " + window.getComputedStyle(div).getPropertyValue("font-family");
       if (debug) console.log(ctx.font);
       let no = 1;
-      const divWidth = parseInt(window.getComputedStyle(div).getPropertyValue("width").replace(/px/g,""));
-      if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + divWidth);
-      while((ctx.measureText(' '.repeat(no)).width) < divWidth * 0.8 ) {
-        if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + divWidth);
+      while((ctx.measureText(' '.repeat(no)).width) < w * 0.8 ) {
+        if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + w);
         no ++;
       }
       return no;
@@ -270,7 +269,7 @@ class Annogram {
 
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
-    const characterPerLine = calculateMaxCharacterNoPerLine(targetDiv, opts.debug);
+    const characterPerLine = calculateMaxCharacterNoPerLine(targetDiv, opts.width, opts.debug);
     if (opts.debug) console.log("characterPerLine: " + characterPerLine);
 
     while (targetDiv.firstChild) {
