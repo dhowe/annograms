@@ -259,9 +259,10 @@ class Annogram {
       ctx.font = window.getComputedStyle(div).getPropertyValue("font-size") + " " + window.getComputedStyle(div).getPropertyValue("font-family");
       if (debug) console.log(ctx.font);
       let no = 1;
-      if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + div.clientWidth);
-      while((ctx.measureText(' '.repeat(no)).width) < div.clientWidth * 0.8 ) {
-        if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + div.clientWidth);
+      const divWidth = parseInt(window.getComputedStyle(div).getPropertyValue("width").replace(/px/g,""));
+      if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + divWidth);
+      while((ctx.measureText(' '.repeat(no)).width) < divWidth * 0.8 ) {
+        if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + divWidth);
         no ++;
       }
       return no;
