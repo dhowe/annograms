@@ -87,7 +87,7 @@ class Annogram {
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
       let phrase = this.RiTa.untokenize(m.tokens);
-      if (/^[,;:]/.test(phrase)) {             // hide leading punct
+      if (/^[,;:.]/.test(phrase)) {             // hide leading punct
         phrase = ' ' + phrase.slice(1);
         indent -= 1;
       }
@@ -236,7 +236,7 @@ class Annogram {
     let targetDiv = document.createElement("div");
     targetDiv.classList.add("asLineAnimationContainer");
     let width = opts.width || 800;
-    let height = opts.height || 500;
+    let height = opts.height || 400;
     targetDiv.style.height = height + "px";
     targetDiv.style.maxHeight = height + 'px';
     targetDiv.style.width = width + "px";
