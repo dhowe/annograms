@@ -280,6 +280,11 @@ class Annogram {
     for (let i = 0; i < lines.length; i++) {
 
       // wrap and indent
+      if (i === 1) {
+        let computedStyle = window.getComputedStyle(targetDiv.firstChild);
+        targetFont = computedStyle.getPropertyValue("font-size") + " " + computedStyle.getPropertyValue("font-family");
+        characterPerLine = calculateMaxCharacterNoPerLine(targetFont, opts.width, opts.debug);
+      }
       let line = lines[i];
       if (line[0] !== ' ') {
         currentWrapIndentCursor = 0;
@@ -386,11 +391,6 @@ class Annogram {
       targetDiv.append(thisLineSpan);
       thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
-      if (i === 0) {
-        let computedStyle = window.getComputedStyle(thisLineSpan);
-        targetFont = computedStyle.getPropertyValue("font-size") + " " + computedStyle.getPropertyValue("font-family");
-        characterPerLine = calculateMaxCharacterNoPerLine(targetFont, opts.width, opts.debug);
-      }
       await delay(delayMs);
     }
   }
