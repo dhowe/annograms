@@ -269,14 +269,7 @@ class Annogram {
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
     let targetFont;
-    let temElement = document.createElement("span");
-    temElement.classList.add("animatedLine");
-    temElement.append("Test");
-    targetDiv.append(temElement);
-    if (opts.debug) console.log(window.getComputedStyle(temElement));
-    targetFont = window.getComputedStyle(temElement).getPropertyValue("font-size") + " " + window.getComputedStyle(temElement).getPropertyValue("font-family"); 
-    const characterPerLine = calculateMaxCharacterNoPerLine(targetFont, opts.width, opts.debug);
-    if (opts.debug) console.log("characterPerLine: " + characterPerLine);
+    let characterPerLine = Number.MAX_SAFE_INTEGER;
 
     while (targetDiv.firstChild) {
       targetDiv.removeChild(targetDiv.firstChild);
@@ -393,7 +386,11 @@ class Annogram {
       targetDiv.append(thisLineSpan);
       thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
-      //TODO: auto scroll?
+      if (i === 0) {
+        let computedStyle = window.getComputedStyle(thisLineSpan);
+        targetFont = computedStyle.getPropertyValue("font-size") + " " + computedStyle.getPropertyValue("font-family");
+        characterPerLine = calculateMaxCharacterNoPerLine(targetFont, opts.width, opts.debug);
+      }
       await delay(delayMs);
     }
   }
