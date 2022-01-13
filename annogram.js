@@ -254,22 +254,27 @@ class Annogram {
       });
     }
 
-    const calculateMaxCharacterNoPerLine = function(div, w, debug) {
+    const calculateMaxCharacterNoPerLine = function(font, w, debug) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext('2d');
-      ctx.font = window.getComputedStyle(div).getPropertyValue("font-size") + " " + window.getComputedStyle(div).getPropertyValue("font-family");
+      ctx.font = font;
       if (debug) console.log(ctx.font);
       let no = 1;
       while((ctx.measureText(' '.repeat(no)).width) < w * 0.8 ) {
-        if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + w);
+        //if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + w);
         no ++;
       }
       return no;
     }
-
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
-    const characterPerLine = calculateMaxCharacterNoPerLine(targetDiv, opts.width, opts.debug);
+    let targetFont;
+    let temElement = document.createElement("span");
+    temElement.classList.add("animatedLine");
+    temElement.append("Test");
+    targetDiv.append(temElement);
+    targetFont = window.getComputedStyle(temElement).getPropertyValue("font-size") + " " + window.getComputedStyle(temElement).getPropertyValue("font-family"); 
+    const characterPerLine = calculateMaxCharacterNoPerLine(targetFont, opts.width, opts.debug);
     if (opts.debug) console.log("characterPerLine: " + characterPerLine);
 
     while (targetDiv.firstChild) {
