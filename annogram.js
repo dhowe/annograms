@@ -40,7 +40,7 @@ class Annogram {
         sourceId: src.id,
         start: (idx - tokens.length)
       });
-      //console.log(`g[#${src.id}]`, this.RiTa.untokenize(tokens));
+      //console.log("g[#"+src.id+"]", this.RiTa.untokenize(tokens));
       tokens = [];
     }
 
@@ -87,7 +87,7 @@ class Annogram {
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
       let phrase = this.RiTa.untokenize(m.tokens);
-      if (/^[,;:]/.test(phrase)) {             // hide leading punct
+      if (/^[,;:.]/.test(phrase)) {             // hide leading punct
         phrase = ' ' + phrase.slice(1);
         indent -= 1;
       }
@@ -135,11 +135,9 @@ class Annogram {
       if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
       let sourceDiv = document.createElement("div");
-      // sourceDiv.style.wordBreak = "normal";
-      // sourceDiv.style.whiteSpace = "normal";
       sourceDiv.classList.add("source");
       sourceDiv.id = "source" + i;
-      let regexStr = nextForSourceSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let regexStr = nextForSourceSearch.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
       if (/[A-Za-z]/.test(nextForSourceSearch[0])) regexStr = "(?<![A-Za-z])" + regexStr;
       if (/[A-Za-z]/.test(nextForSourceSearch[nextForSourceSearch.length - 1])) regexStr += "(?![A-Za-z])";
 
@@ -214,8 +212,6 @@ class Annogram {
         if (typeof noBreakWrap === "undefined") {
           noBreakWrap = document.createElement("span");
           noBreakWrap.classList.add("noBreakWrap");
-          // noBreakWrap.style.wordBreak = "keep-all";
-          // noBreakWrap.style.whiteSpace = "nowrap";
         }
         noBreakWrap.append(thisSegment);
       } else if (typeof noBreakWrap !== "undefined") {
@@ -232,32 +228,88 @@ class Annogram {
     return resultDiv;
   }
 
-  // TODO: re-implement with new annotations, remove styling, add options parameter
-  async asLineAnimation(poem, targetDiv, delayMs = 500, fadeInMs = 100) {
+  asLineAnimation(poem, opts={}){
+    let targetDiv = document.createElement("div");
+    targetDiv.classList.add("asLineAnimationContainer");
+    let width = opts.width || 800;
+    let height = opts.height || 400;
+    targetDiv.style.height = height + "px";
+    targetDiv.style.maxHeight = height + 'px';
+    targetDiv.style.width = width + "px";
+    targetDiv.style.maxWidth = width + 'px';
+    opts.width = width;
+    this._animation(poem, targetDiv, opts);
+    return targetDiv;
+  }
+
+  async _animation(poem, targetDiv, opts={}) {
+    let delayMs = opts.delayMs || 500;
+    let fadeInMs = opts.fadeInMs || 100;
+    let paragraphIndent = opts.paragraphIndent || 0;
+    let warpIndent = opts.warpIndent || 8;
     const delay = function (n) {
       return new Promise(function (resolve) {
         setTimeout(resolve, n);
       });
     }
 
+    const calculateMaxCharacterNoPerLine = function(font, w, debug) {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext('2d');
+      ctx.font = font;
+      if (debug) console.log(ctx.font);
+      let no = 1;
+      while((ctx.measureText(' '.repeat(no)).width) < w * 0.8 ) {
+        no ++;
+      }
+      return no;
+    }
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
+    let targetFont;
+    let characterPerLine = Number.MAX_SAFE_INTEGER;
+
     while (targetDiv.firstChild) {
       targetDiv.removeChild(targetDiv.firstChild);
     }
-    targetDiv.classList.add("displayAnimated");
-    targetDiv.style.overflowX = "auto";
+
+    let currentWrapIndentCursor = 0;
+
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+
+      // wrap and indent
+      if (i === 1) {
+        let computedStyle = window.getComputedStyle(targetDiv.firstChild);
+        targetFont = computedStyle.getPropertyValue("font-size") + " " + computedStyle.getPropertyValue("font-family");
+        characterPerLine = calculateMaxCharacterNoPerLine(targetFont, opts.width, opts.debug);
+      }
+      let line = lines[i];
+      if (line[0] !== ' ') {
+        currentWrapIndentCursor = 0;
+        if (i > 0) {
+          targetDiv.append(document.createElement("br"));
+        }
+      }
+      if (paragraphIndent > 0) {
+        line = ' '.repeat(paragraphIndent) + line;
+      }
+      line = line.substring(currentWrapIndentCursor);
+      if (line.length > characterPerLine) {
+        let temArr = /^\s+/.exec(line);
+        if (temArr){
+          let totalSpaceLength = temArr[0].length;
+          line = line.substring(totalSpaceLength - (paragraphIndent + warpIndent));
+          currentWrapIndentCursor += totalSpaceLength - (paragraphIndent + warpIndent);
+        }
+      }
+
       const meta = poem.meta[i];
       if (meta.sourceId < 0) throw Error('TODO: handle sourceId == -1');
       let src = this.source.find(p => p.id === meta.sourceId);
       if (!src) throw Error('No source for sourceId #' + meta.sourceId);
 
       let thisLineSpan = document.createElement("span");
-      thisLineSpan.style.whiteSpace = "pre";
-      thisLineSpan.style.wordBreak = "keep-all";
-      thisLineSpan.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
+      thisLineSpan.classList.add("animatedLine");
       let execArr = /^\s+/.exec(line);
       if (execArr) thisLineSpan.append(execArr[0]);
       let textDisplay = document.createElement('a');
@@ -266,10 +318,8 @@ class Annogram {
       let txt = line.replace(/^\s+/, "");
 
       let sourceDiv = document.createElement("div");
-      sourceDiv.style.wordBreak = "normal";
-      sourceDiv.style.whiteSpace = "normal";
       sourceDiv.classList.add("source");
-      let regexStr = txt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let regexStr = txt.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
       if (/[A-Za-z]/.test(txt[0])) regexStr = "(?<![A-Za-z])" + regexStr;
       if (/[A-Za-z]/.test(txt[txt.length - 1])) regexStr += "(?![A-Za-z])";
 
@@ -339,15 +389,14 @@ class Annogram {
       targetDiv.append(thisLineSpan);
       thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
-      //TODO: auto scroll?
       await delay(delayMs);
     }
   }
+
   _lookupSource(tokens, dbugInfo) {
     let phrase = this.RiTa.untokenize(tokens);
     let srcs = this.source.filter(p => p.text.includes(phrase));
-    if (!srcs || !srcs.length) throw Error(`(${dbugInfo.index}) `
-      + `No source for "${phrase}"\n\n${dbugInfo.text}`);
+    if (!srcs || !srcs.length) throw Error("(" + dbugInfo.index +") No source for \"" + phrase + "\"\n\n" + dbugInfo.text);
     srcs.sort((a, b) => a.id - b.id);
     return srcs;
   }
