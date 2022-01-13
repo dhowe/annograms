@@ -273,6 +273,7 @@ class Annogram {
     temElement.classList.add("animatedLine");
     temElement.append("Test");
     targetDiv.append(temElement);
+    if (opts.debug) console.log(window.getComputedStyle(temElement));
     targetFont = window.getComputedStyle(temElement).getPropertyValue("font-size") + " " + window.getComputedStyle(temElement).getPropertyValue("font-family"); 
     const characterPerLine = calculateMaxCharacterNoPerLine(targetFont, opts.width, opts.debug);
     if (opts.debug) console.log("characterPerLine: " + characterPerLine);
