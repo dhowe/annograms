@@ -40,7 +40,7 @@ class Annogram {
         sourceId: src.id,
         start: (idx - tokens.length)
       });
-      //console.log(`g[#${src.id}]`, this.RiTa.untokenize(tokens));
+      //console.log("g[#"+src.id+"]", this.RiTa.untokenize(tokens));
       tokens = [];
     }
 
@@ -139,7 +139,7 @@ class Annogram {
       // sourceDiv.style.whiteSpace = "normal";
       sourceDiv.classList.add("source");
       sourceDiv.id = "source" + i;
-      let regexStr = nextForSourceSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let regexStr = nextForSourceSearch.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
       if (/[A-Za-z]/.test(nextForSourceSearch[0])) regexStr = "(?<![A-Za-z])" + regexStr;
       if (/[A-Za-z]/.test(nextForSourceSearch[nextForSourceSearch.length - 1])) regexStr += "(?![A-Za-z])";
 
@@ -232,8 +232,20 @@ class Annogram {
     return resultDiv;
   }
 
+  asLineAnimation(poem, opts={}){
+    let targetDiv = document.createElement("div");
+    targetDiv.classList.add("asLineAnimationContainer");
+    let height = opts.divHeight || 500;
+    targetDiv.style.maxHeight = height + 'px';
+    this._animation(poem, targetDiv, opts);
+    return targetDiv;
+  }
+
   // TODO: re-implement with new annotations, remove styling, add options parameter
-  async asLineAnimation(poem, targetDiv, delayMs = 500, fadeInMs = 100) {
+  async _animation(poem, targetDiv, opts={}) {
+    let delayMs = opts.delayMs || 500;
+    let fadeInMs = opts.fadeInMs || 100;
+    let paragraphIndent = opts.paragraphIndent || 0;
     const delay = function (n) {
       return new Promise(function (resolve) {
         setTimeout(resolve, n);
@@ -245,8 +257,8 @@ class Annogram {
     while (targetDiv.firstChild) {
       targetDiv.removeChild(targetDiv.firstChild);
     }
-    targetDiv.classList.add("displayAnimated");
-    targetDiv.style.overflowX = "auto";
+    // targetDiv.classList.add("displayAnimated");
+    // targetDiv.style.overflowX = "auto";
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const meta = poem.meta[i];
@@ -255,10 +267,12 @@ class Annogram {
       if (!src) throw Error('No source for sourceId #' + meta.sourceId);
 
       let thisLineSpan = document.createElement("span");
-      thisLineSpan.style.whiteSpace = "pre";
-      thisLineSpan.style.wordBreak = "keep-all";
-      thisLineSpan.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
+      thisLineSpan.classList.add("animatedLine");
+      // thisLineSpan.style.whiteSpace = "pre";
+      // thisLineSpan.style.wordBreak = "keep-all";
+      // thisLineSpan.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
       let execArr = /^\s+/.exec(line);
+      console.log(execArr, line);
       if (execArr) thisLineSpan.append(execArr[0]);
       let textDisplay = document.createElement('a');
       textDisplay.classList.add("meta");
@@ -266,10 +280,10 @@ class Annogram {
       let txt = line.replace(/^\s+/, "");
 
       let sourceDiv = document.createElement("div");
-      sourceDiv.style.wordBreak = "normal";
-      sourceDiv.style.whiteSpace = "normal";
+      // sourceDiv.style.wordBreak = "normal";
+      // sourceDiv.style.whiteSpace = "normal";
       sourceDiv.classList.add("source");
-      let regexStr = txt.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let regexStr = txt.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
       if (/[A-Za-z]/.test(txt[0])) regexStr = "(?<![A-Za-z])" + regexStr;
       if (/[A-Za-z]/.test(txt[txt.length - 1])) regexStr += "(?![A-Za-z])";
 
@@ -343,11 +357,11 @@ class Annogram {
       await delay(delayMs);
     }
   }
+
   _lookupSource(tokens, dbugInfo) {
     let phrase = this.RiTa.untokenize(tokens);
     let srcs = this.source.filter(p => p.text.includes(phrase));
-    if (!srcs || !srcs.length) throw Error(`(${dbugInfo.index}) `
-      + `No source for "${phrase}"\n\n${dbugInfo.text}`);
+    if (!srcs || !srcs.length) throw Error("(" + dbugInfo.index +") No source for \"" + phrase + "\"\n\n" + dbugInfo.text);
     srcs.sort((a, b) => a.id - b.id);
     return srcs;
   }

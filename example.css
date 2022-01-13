@@ -4,6 +4,13 @@
   font-family: Consolas,Monaco,'Lucida Console','Liberation Mono','DejaVu Sans Mono','Bitstream Vera Sans Mono','Courier New';
 }
 
+.asLineAnimationContainer{
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-size: smaller;
+  line-height: 70%;
+}
+
 .meta{
   position: relative;
   display: inline-block;
