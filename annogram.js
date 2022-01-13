@@ -288,14 +288,13 @@ class Annogram {
       if (paragraphIndent > 0) {
         line = ' '.repeat(paragraphIndent) + line;
       }
-      
-      while((line = line.substring(currentWrapIndentCursor)).length > characterPerLine) {
+      line = line.substring(currentWrapIndentCursor);
+      if (line.length > characterPerLine) {
         let temArr = /^\s+/.exec(line);
-        if (temArr) {
+        if (temArr){
           let totalSpaceLength = temArr[0].length;
+          line = line.substring(totalSpaceLength - (paragraphIndent + warpIndent));
           currentWrapIndentCursor += totalSpaceLength - (paragraphIndent + warpIndent);
-        } else {
-          break;
         }
       }
 
