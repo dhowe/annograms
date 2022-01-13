@@ -267,19 +267,20 @@ class Annogram {
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
     const characterPerLine = calculateMaxCharacterNoPerLine(targetDiv);
+    if (opts.debug) console.log("characterPerLine: " + characterPerLine);
 
     while (targetDiv.firstChild) {
       targetDiv.removeChild(targetDiv.firstChild);
     }
 
-    let currentWrapIndentCursor = undefined;
+    let currentWrapIndentCursor = 0;
 
     for (let i = 0; i < lines.length; i++) {
 
       // wrap and indent
       let line = lines[i];
       if (line[0] !== ' ') {
-        currentWrapIndentCursor = undefined;
+        currentWrapIndentCursor = 0;
         if (i > 0) {
           targetDiv.append(document.createElement("br"));
         }
@@ -287,15 +288,15 @@ class Annogram {
       if (paragraphIndent > 0) {
         line = ' '.repeat(paragraphIndent) + line;
       }
-      if (line.length > characterPerLine && typeof currentWrapIndentCursor === 'undefined') {
-        let execArr = /^\s+/.exec(line);
-        if (execArr) {
-          let totalSpaceLength = execArr[0].length;
-          currentWrapIndentCursor = totalSpaceLength - (paragraphIndent+warpIndent);
-          line = line.substring(currentWrapIndentCursor);
+      
+      while((line = line.substring(currentWrapIndentCursor)).length > characterPerLine) {
+        let temArr = /^\s+/.exec(line);
+        if (temArr) {
+          let totalSpaceLength = temArr[0].length;
+          currentWrapIndentCursor += totalSpaceLength - (paragraphIndent + warpIndent);
+        } else {
+          break;
         }
-      } else if (line.length > characterPerLine && typeof currentWrapIndentCursor === 'number') {
-        line = line.substring(currentWrapIndentCursor);
       }
 
       const meta = poem.meta[i];
