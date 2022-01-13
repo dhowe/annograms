@@ -258,7 +258,8 @@ class Annogram {
       const ctx = canvas.getContext('2d');
       ctx.font = window.getComputedStyle(div).getPropertyValue("font-size") + " " + window.getComputedStyle(div).getPropertyValue("font-family");
       if (debug) console.log(ctx.font);
-      let no = 0;
+      let no = 1;
+      if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + div.clientWidth);
       while((ctx.measureText(' '.repeat(no)).width) < div.clientWidth * 0.8 ) {
         if (debug) console.log("textW: " + ctx.measureText(' '.repeat(no)).width + ", divWidth: " + div.clientWidth);
         no ++;
