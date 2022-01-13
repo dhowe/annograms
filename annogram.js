@@ -135,8 +135,6 @@ class Annogram {
       if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
       let sourceDiv = document.createElement("div");
-      // sourceDiv.style.wordBreak = "normal";
-      // sourceDiv.style.whiteSpace = "normal";
       sourceDiv.classList.add("source");
       sourceDiv.id = "source" + i;
       let regexStr = nextForSourceSearch.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
@@ -214,8 +212,6 @@ class Annogram {
         if (typeof noBreakWrap === "undefined") {
           noBreakWrap = document.createElement("span");
           noBreakWrap.classList.add("noBreakWrap");
-          // noBreakWrap.style.wordBreak = "keep-all";
-          // noBreakWrap.style.whiteSpace = "nowrap";
         }
         noBreakWrap.append(thisSegment);
       } else if (typeof noBreakWrap !== "undefined") {
@@ -250,21 +246,58 @@ class Annogram {
     let delayMs = opts.delayMs || 500;
     let fadeInMs = opts.fadeInMs || 100;
     let paragraphIndent = opts.paragraphIndent || 0;
+    let warpIndent = opts.warpIndent || 8;
     const delay = function (n) {
       return new Promise(function (resolve) {
         setTimeout(resolve, n);
       });
     }
 
+    const calculateMaxCharacterNoPerLine = function(div) {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext('2d');
+      ctx.font = window.getComputedStyle(div).getPropertyValue("font-size") + " " + window.getComputedStyle(div).getPropertyValue("font-family");
+      let no = 0;
+      while(ctx.measureText(' '.repeat(no)).width < div.clientWidth * 0.8 ) {
+        no ++;
+      }
+      return no;
+    }
+
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
+    const characterPerLine = calculateMaxCharacterNoPerLine(targetDiv);
+
     while (targetDiv.firstChild) {
       targetDiv.removeChild(targetDiv.firstChild);
     }
-    // targetDiv.classList.add("displayAnimated");
-    // targetDiv.style.overflowX = "auto";
+
+    let currentWrapIndentCursor = undefined;
+
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
+
+      // wrap and indent
+      let line = lines[i];
+      if (line[0] !== ' ') {
+        currentWrapIndentCursor = undefined;
+        if (i > 0) {
+          targetDiv.append(document.createElement("br"));
+        }
+      }
+      if (paragraphIndent > 0) {
+        line = ' '.repeat(paragraphIndent) + line;
+      }
+      if (line.length > characterPerLine && typeof currentWrapIndentCursor === 'undefined') {
+        let execArr = /^\s+/.exec(line);
+        if (execArr) {
+          let totalSpaceLength = execArr[0].length;
+          currentWrapIndentCursor = totalSpaceLength - (paragraphIndent+warpIndent);
+          line = line.substring(currentWrapIndentCursor);
+        }
+      } else if (line.length > characterPerLine && typeof currentWrapIndentCursor === 'number') {
+        line = line.substring(currentWrapIndentCursor);
+      }
+
       const meta = poem.meta[i];
       if (meta.sourceId < 0) throw Error('TODO: handle sourceId == -1');
       let src = this.source.find(p => p.id === meta.sourceId);
@@ -272,11 +305,7 @@ class Annogram {
 
       let thisLineSpan = document.createElement("span");
       thisLineSpan.classList.add("animatedLine");
-      // thisLineSpan.style.whiteSpace = "pre";
-      // thisLineSpan.style.wordBreak = "keep-all";
-      // thisLineSpan.style.fontFamily = "Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New";
       let execArr = /^\s+/.exec(line);
-      console.log(execArr, line);
       if (execArr) thisLineSpan.append(execArr[0]);
       let textDisplay = document.createElement('a');
       textDisplay.classList.add("meta");
@@ -284,8 +313,6 @@ class Annogram {
       let txt = line.replace(/^\s+/, "");
 
       let sourceDiv = document.createElement("div");
-      // sourceDiv.style.wordBreak = "normal";
-      // sourceDiv.style.whiteSpace = "normal";
       sourceDiv.classList.add("source");
       let regexStr = txt.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
       if (/[A-Za-z]/.test(txt[0])) regexStr = "(?<![A-Za-z])" + regexStr;
