@@ -233,8 +233,7 @@ class Annogram {
     targetDiv.classList.add("asLineAnimationContainer");
     let width = opts.width || 800;
     let height = opts.height || 400;
-    targetDiv.style.height = height + "px";
-    targetDiv.style.maxHeight = height + 'px';
+    targetDiv.style.minHeight = height + 'px';
     targetDiv.style.width = width + "px";
     targetDiv.style.maxWidth = width + 'px';
     opts.width = width;
