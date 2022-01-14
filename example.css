@@ -5,8 +5,6 @@
 }
 
 .asLineAnimationContainer{
-  overflow-y: hidden;
-  overflow-x: hidden;
   font-size: smaller;
   line-height: 80%;
   height: auto;
