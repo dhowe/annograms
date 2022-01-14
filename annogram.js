@@ -235,7 +235,6 @@ class Annogram {
     let height = opts.height || 400;
     targetDiv.style.minHeight = height + 'px';
     targetDiv.style.width = width + "px";
-    targetDiv.style.maxWidth = width + 'px';
     opts.width = width;
     this._animation(poem, targetDiv, opts);
     return targetDiv;
@@ -258,10 +257,10 @@ class Annogram {
       ctx.font = font;
       if (debug) console.log(ctx.font);
       let no = 1;
-      while((ctx.measureText(' '.repeat(no)).width) < w * 0.8 ) {
+      while((ctx.measureText(' '.repeat(no)).width) < w ) {
         no ++;
       }
-      return no;
+      return no - 1;
     }
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
