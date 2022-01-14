@@ -5,10 +5,9 @@
 }
 
 .asLineAnimationContainer{
-  overflow-y: auto;
-  overflow-x: hidden;
   font-size: smaller;
   line-height: 80%;
+  height: auto;
 }
 
 .meta{
