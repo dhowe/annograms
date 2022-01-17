@@ -57,7 +57,7 @@ class Annogram {
     for (let i = n; i < words.length; i++) {
 
       if (words[i] === Annogram.lb) {
-        if (tokens.length) addMeta(i - 1);
+        if (tokens.length) addMeta(i);
         words.splice(i,1); // delete LB
         i--; // resume i to correctly calculate "start"
         tokens = words.slice(i, i + n);
