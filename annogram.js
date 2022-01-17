@@ -57,8 +57,9 @@ class Annogram {
     for (let i = n; i < words.length; i++) {
 
       if (words[i] === Annogram.lb) {
-        if (tokens.length) addMeta(i);
-        i++; // skip the LB
+        if (tokens.length) addMeta(i - 1);
+        words.splice(i,1); // delete LB
+        i--; // resume i to correctly calculate "start"
         tokens = words.slice(i, i + n);
         src = this._lookupSource(tokens, { text, index: i })[0];
         i += n;
