@@ -38,94 +38,94 @@ describe('Annograms', function () {
       //assert.equal(1,2);
       let expected = [
         {
-          tokens: ['Her', 'arms', 'moved', 'up', 'now', ','],
-          sourceId: 95,
-          start: 0,
-          end: 2
+          "tokens": ["Her", "arms", "moved", "up", "now", ","],
+          "sourceId": 95,
+          "start": 0,
+          "end": 2
         },
         {
-          tokens: ['up', 'now', ',', 'no', 'one', 'knows'],
-          sourceId: 484,
-          start: 3,
-          end: 5
+          "tokens": ["up", "now", ",", "no", "one", "knows"],
+          "sourceId": 484,
+          "start": 3,
+          "end": 5
         },
         {
-          tokens: ['no', 'one', 'knows', ',', 'perhaps', 'not'],
-          sourceId: 491,
-          start: 6,
-          end: 8
+          "tokens": [ "no", "one", "knows", ",", "perhaps", "not"],
+          "sourceId": 491,
+          "start": 6,
+          "end": 8
         },
         {
-          tokens: [',', 'perhaps', 'not', 'at', 'all', ','],
-          sourceId: 412,
-          start: 9,
-          end: 11
+          "tokens": [ ",", "perhaps", "not", "at", "all", ","],
+          "sourceId": 412,
+          "start": 9,
+          "end": 11
         },
         {
-          tokens: ['at', 'all', ',', 'but', 'a'],
-          sourceId: 192,
-          start: 12,
-          end: 13
+          "tokens": [ "at", "all", ",", "but", "a"],
+          "sourceId": 192,
+          "start": 12,
+          "end": 13
         },
         {
-          tokens: [',', 'but', 'a', 'dream', 'of'],
-          sourceId: 88,
-          start: 14,
-          end: 15
+          "tokens": [ ",", "but", "a", "dream", "of"],
+          "sourceId": 88,
+          "start": 14,
+          "end": 15
         },
         {
-          tokens: ['a', 'dream', 'of', 'you', '.'],
-          sourceId: 322,
-          start: 16,
-          end: 21
+          "tokens": ["a", "dream", "of", "you", "."],
+          "sourceId": 322,
+          "start": 16,
+          "end": 20
         },
         {
-          tokens: ['I', 'was', 'sitting', 'at', 'the'],
-          sourceId: 396,
-          start: 22,
-          end: 23
+          "tokens": ["I", "was", "sitting", "at", "the"],
+          "sourceId": 396,
+          "start": 21,
+          "end": 22
         },
         {
-          tokens: ['sitting', 'at', 'the', 'table', ','],
-          sourceId: 17,
-          start: 24,
-          end: 25
+          "tokens": ["sitting","at", "the", "table", ","],
+          "sourceId": 17,
+          "start": 23,
+          "end": 24
         },
         {
-          tokens: ['the', 'table', ',', 'she'],
-          sourceId: 456,
-          start: 26,
-          end: 26
+          "tokens": ["the","table",",","she"],
+          "sourceId": 456,
+          "start": 25,
+          "end": 25
         },
         {
-          tokens: ['table', ',', 'she', 'told', 'me'],
-          sourceId: 473,
-          start: 27,
-          end: 28
+          "tokens": ["table", ",", "she", "told", "me"],
+          "sourceId": 473,
+          "start": 26,
+          "end": 27
         },
         {
-          tokens: ['she', 'told', 'me', 'that'],
-          sourceId: 473,
-          start: 29,
-          end: 29
+          "tokens": ["she", "told", "me", "that"],
+          "sourceId": 473,
+          "start": 28,
+          "end": 28
         },
         {
-          tokens: ['told', 'me', 'that', 'I', 'should'],
-          sourceId: 356,
-          start: 30,
-          end: 31
+          "tokens": ["told", "me", "that", "I", "should"],
+          "sourceId": 356,
+          "start": 29,
+          "end": 30
         },
         {
-          tokens: ['that', 'I', 'should', 'not'],
-          sourceId: 137,
-          start: 32,
-          end: 32
+          "tokens": ["that", "I", "should", "not"],
+          "sourceId": 137,
+          "start": 31,
+          "end": 31
         },
         {
-          tokens: ['I', 'should', 'not', 'know', '.'],
-          sourceId: 131,
-          start: 33,
-          end: 37
+          "tokens": ["I", "should", "not", "know", "."],
+          "sourceId": 131,
+          "start": 32,
+          "end": 36
         }
       ];
       // for (let i = 0; i < expected.length; i++) {
