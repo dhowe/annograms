@@ -20,6 +20,7 @@
 }
 
 .display{
+  font-family: 'Times New Roman', Times, serif;
   width:800px
 }
 
@@ -29,7 +30,7 @@
 }
 
 .source{
-  font-family: serif;
+  font-family:'Times New Roman', Times, serif;
   line-height: normal;
   word-break: normal;
   white-space: normal;
