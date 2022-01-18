@@ -338,7 +338,7 @@ class Annogram {
     if (!opts.keepAuthorFormat) {
       let sections = author.split(' ');
       sections.forEach(word => {
-        if (/^[[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
+        if (/^[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
           word = word[0] + (word.substring(1)).toLowerCase();
         }
       });
