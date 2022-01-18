@@ -335,15 +335,14 @@ class Annogram {
     let footnotePara = document.createElement("p");
     footnotePara.classList.add("sourceFootnote");
     let author = src.author;
-    if (!opts.keepAuthorFormat) {
-      let sections = author.split(' ');
-      sections.forEach(word => {
-        if (/^[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
-          word = word[0] + (word.substring(1)).toLowerCase();
-        }
-      });
-      author = sections.join(' ');
-    }
+    let sections = author.split(' ');
+    sections.forEach(word => {
+      if (/^[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
+        word = word[0] + (word.substring(1)).toLowerCase();
+      }
+    });
+    author = sections.join(' ');
+    
     footnotePara.innerHTML = "from <i>" + title + "</i> by " + author;
     res.append(footnotePara);
     return res;
