@@ -337,7 +337,7 @@ class Annogram {
     let author = src.author;
     let sections = author.split(' ');
     for (let i = 0; i < sections.length; i++) {
-      let word = array[i];
+      let word = sections[i];
       if (/^[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
         word = word[0] + (word.substring(1)).toLowerCase();
       }
