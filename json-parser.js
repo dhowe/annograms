@@ -9,7 +9,8 @@ const loadShortAnInternationalAnthology = function (log) {
   const inpath = './text/Short_An_International_Anthology.txt';
   const outpath = './data/Short_An_International_Anthology.json';
 
-  const authorRE = /^([A-Z\u00C0-\u00DC -]+) (\(.+\))/;
+  const authorLineRE = /^([A-Z\u00C0-\u00DC -]+) (\(.+\))/;
+  const authorRE = /([A-Z\u00C0-\u00DC]{2,})/g;
   const titleRE = /(.+(?:\b +.+)*)/;
   const closeRE = /^---$/;
 
@@ -21,9 +22,17 @@ const loadShortAnInternationalAnthology = function (log) {
 
     // parse author / meta
     if (!hasAuthor) {
-      let match = authorRE.exec(line);
+      let match = authorLineRE.test(line);
       if (match) {
-        current = { author: match[1], author_meta: match[2], source };
+        let end;
+        while(authorRE.exec(line) !== null) {
+          end = authorRE.lastIndex;
+        }
+        let author = line.substring(0, end);
+        author = author.trim();
+        let author_meta = line.substring(end);
+        author_meta = author_meta.trim();
+        current = { author: author, author_meta: author_meta, source };
         hasAuthor = true;
       }
     }
