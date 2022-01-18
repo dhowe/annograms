@@ -339,7 +339,7 @@ class Annogram {
     for (let i = 0; i < sections.length; i++) {
       let word = sections[i];
       if (/^[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
-        word = word[0] + (word.substring(1)).toLowerCase();
+        sections[i] = word[0] + (word.substring(1)).toLowerCase();
       }
     }
     author = sections.join(' ');
