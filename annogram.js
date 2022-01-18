@@ -336,12 +336,12 @@ class Annogram {
     footnotePara.classList.add("sourceFootnote");
     let author = src.author;
     let sections = author.split(' ');
-    sections.forEach(word => {
+    for (let i = 0; i < sections.length; i++) {
+      let word = array[i];
       if (/^[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
         word = word[0] + (word.substring(1)).toLowerCase();
-        console.log(word);
       }
-    });
+    }
     author = sections.join(' ');
     
     footnotePara.innerHTML = "from <i>" + title + "</i> by " + author;
