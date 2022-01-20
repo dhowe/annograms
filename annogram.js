@@ -134,71 +134,7 @@ class Annogram {
       let nextForSourceSearch = this.RiTa.untokenize(m.tokens);
       if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
 
-      let sourceDiv = document.createElement("div");
-      sourceDiv.classList.add("source");
-      sourceDiv.id = "source" + i;
-      let regexStr = nextForSourceSearch.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
-      if (/[A-Za-z]/.test(nextForSourceSearch[0])) regexStr = "(?<![A-Za-z])" + regexStr;
-      if (/[A-Za-z]/.test(nextForSourceSearch[nextForSourceSearch.length - 1])) regexStr += "(?![A-Za-z])";
-
-      const regex = new RegExp(regexStr);
-      let inOriginIndexFrom = (regex.exec(src.text)) ? (regex.exec(src.text)).index : src.text.indexOf(nextForSourceSearch);
-      let inOriginIndexTo = inOriginIndexFrom + nextForSourceSearch.length;
-      // 140 characters before and after
-      const targetCharacterNo = 140;
-      let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
-      let after = "", afterStartIndex = inOriginIndexTo;
-      while (addedCharacterCount < targetCharacterNo) {
-        if (beforeStartIndex < 0 && afterStartIndex > src.text.length - 1) {
-          break;
-        }
-        if (beforeStartIndex >= 0) {
-          before = src.text[beforeStartIndex] + before;
-          addedCharacterCount++;
-          beforeStartIndex--;
-        }
-        if (addedCharacterCount >= targetCharacterNo) break;
-        if (afterStartIndex <= src.text.length - 1) {
-          after += src.text[afterStartIndex];
-          afterStartIndex++;
-          addedCharacterCount++;
-        }
-      }
-
-      if (beforeStartIndex > 0) {
-        before = before.replace(/^\S*\s/, "... ");
-      } else if (beforeStartIndex === 0) {
-        before = src.text[0] + before;
-      }
-
-      if (afterStartIndex < src.text.length - 1) {
-        after = after.replace(/\s+\S*$/, " ...");
-      } else if (afterStartIndex === src.text.length - 1) {
-        after += src.text[src.text.length - 1];
-      }
-
-      let spans = [];
-      let beforeSpan = document.createElement("span");
-      beforeSpan.classList.add("sourceText");
-      beforeSpan.append(before);
-      spans.push(beforeSpan);
-      let nextSpan = document.createElement("span");
-      nextSpan.classList.add("sourceHighlight");
-      nextSpan.append(nextForSourceSearch);
-      spans.push(nextSpan);
-      let afterSpan = document.createElement("span");
-      afterSpan.classList.add("sourceText");
-      afterSpan.append(after);
-      spans.push(afterSpan);
-
-      sourceDiv.append(...spans);
-
-      // handle titles starting with 'from'
-      let title = src.title.trim().replace(/^[Ff]rom /, '');
-      let footnotePara = document.createElement("p");
-      footnotePara.classList.add("sourceFootnote");
-      footnotePara.innerHTML = "from <i>" + title + "</i> by " + src.author;
-      sourceDiv.append(footnotePara);
+      let sourceDiv = this._createSourceDiv(nextForSourceSearch, src);
 
       let thisSegment = document.createElement("a");
       thisSegment.classList.add("meta");
@@ -315,72 +251,7 @@ class Annogram {
       textDisplay.href = "javascript:void(0)";
       let txt = line.replace(/^\s+/, "");
 
-      let sourceDiv = document.createElement("div");
-      sourceDiv.classList.add("source");
-      let regexStr = txt.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
-      if (/[A-Za-z]/.test(txt[0])) regexStr = "(?<![A-Za-z])" + regexStr;
-      if (/[A-Za-z]/.test(txt[txt.length - 1])) regexStr += "(?![A-Za-z])";
-
-      const regex = new RegExp(regexStr);
-      let inOriginIndexFrom = (regex.exec(src.text))
-        ? (regex.exec(src.text)).index : src.text.indexOf(txt);
-      let inOriginIndexTo = inOriginIndexFrom + txt.length;
-      // 140 characters before and after
-      const targetCharacterNo = 140;
-      let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
-      let after = "", afterStartIndex = inOriginIndexTo;
-      while (addedCharacterCount < targetCharacterNo) {
-        if (beforeStartIndex < 0 && afterStartIndex > src.text.length - 1) {
-          break;
-        }
-        if (beforeStartIndex >= 0) {
-          before = src.text[beforeStartIndex] + before;
-          addedCharacterCount++;
-          beforeStartIndex--;
-        }
-        if (addedCharacterCount >= targetCharacterNo) break;
-        if (afterStartIndex <= src.text.length - 1) {
-          after += src.text[afterStartIndex];
-          afterStartIndex++;
-          addedCharacterCount++;
-        }
-      }
-
-      if (beforeStartIndex > 0) {
-        before = before.replace(/^\S*\s/, "... ");
-      } else if (beforeStartIndex === 0) {
-        before = src.text[0] + before;
-      }
-
-      if (afterStartIndex < src.text.length - 1) {
-        after = after.replace(/\s+\S*$/, " ...");
-      } else if (afterStartIndex === src.text.length - 1) {
-        after += src.text[src.text.length - 1];
-      }
-
-      let spans = [];
-      let beforeSpan = document.createElement("span");
-      beforeSpan.classList.add("sourceText");
-      beforeSpan.append(before);
-      spans.push(beforeSpan);
-      let nextSpan = document.createElement("span");
-      nextSpan.classList.add("sourceHighlight");
-      nextSpan.append(txt);
-      spans.push(nextSpan);
-      let afterSpan = document.createElement("span");
-      afterSpan.classList.add("sourceText");
-      afterSpan.append(after);
-      spans.push(afterSpan);
-
-      sourceDiv.append(...spans);
-
-      // handle titles starting with 'from'
-      let title = src.title.trim().replace(/^[Ff]rom /, '');
-      let footnotePara = document.createElement("p");
-      footnotePara.classList.add("sourceFootnote");
-      footnotePara.innerHTML = "from <i>" + title + "</i> by " + src.author;
-      sourceDiv.append(footnotePara);
-
+      let sourceDiv = this._createSourceDiv(txt,src);
       textDisplay.append(txt);
       textDisplay.append(sourceDiv);
       thisLineSpan.append(textDisplay);
@@ -397,6 +268,85 @@ class Annogram {
     if (!srcs || !srcs.length) throw Error("(" + dbugInfo.index +") No source for \"" + phrase + "\"\n\n" + dbugInfo.text);
     srcs.sort((a, b) => a.id - b.id);
     return srcs;
+  }
+
+  _createSourceDiv(txt, src, opts={}){
+    let res = document.createElement("div");
+    res.classList.add("source");
+    let regexStr = txt.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
+    if (/[A-Za-z]/.test(txt[0])) regexStr = "(?<![A-Za-z])" + regexStr;
+    if (/[A-Za-z]/.test(txt[txt.length - 1])) regexStr += "(?![A-Za-z])";
+
+    const regex = new RegExp(regexStr);
+    let inOriginIndexFrom = (regex.exec(src.text))
+      ? (regex.exec(src.text)).index : src.text.indexOf(txt);
+    let inOriginIndexTo = inOriginIndexFrom + txt.length;
+    // 140 characters before and after
+    const targetCharacterNo = 140;
+    let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
+    let after = "", afterStartIndex = inOriginIndexTo;
+    while (addedCharacterCount < targetCharacterNo) {
+      if (beforeStartIndex < 0 && afterStartIndex > src.text.length - 1) {
+        break;
+      }
+      if (beforeStartIndex >= 0) {
+        before = src.text[beforeStartIndex] + before;
+        addedCharacterCount++;
+        beforeStartIndex--;
+      }
+      if (addedCharacterCount >= targetCharacterNo) break;
+      if (afterStartIndex <= src.text.length - 1) {
+        after += src.text[afterStartIndex];
+        afterStartIndex++;
+        addedCharacterCount++;
+      }
+    }
+
+    if (beforeStartIndex > 0) {
+      before = before.replace(/^\S*\s/, "... ");
+    } else if (beforeStartIndex === 0) {
+      before = src.text[0] + before;
+    }
+
+    if (afterStartIndex < src.text.length - 1) {
+      after = after.replace(/\s+\S*$/, " ...");
+    } else if (afterStartIndex === src.text.length - 1) {
+      after += src.text[src.text.length - 1];
+    }
+
+    let spans = [];
+    let beforeSpan = document.createElement("span");
+    beforeSpan.classList.add("sourceText");
+    beforeSpan.append(before);
+    spans.push(beforeSpan);
+    let nextSpan = document.createElement("span");
+    nextSpan.classList.add("sourceHighlight");
+    nextSpan.append(txt);
+    spans.push(nextSpan);
+    let afterSpan = document.createElement("span");
+    afterSpan.classList.add("sourceText");
+    afterSpan.append(after);
+    spans.push(afterSpan);
+
+    res.append(...spans);
+
+    // handle titles starting with 'from'
+    let title = src.title.trim().replace(/^[Ff]rom /, '');
+    let footnotePara = document.createElement("p");
+    footnotePara.classList.add("sourceFootnote");
+    let author = src.author;
+    let sections = author.split(' ');
+    for (let i = 0; i < sections.length; i++) {
+      let word = sections[i];
+      if (/^[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
+        sections[i] = word[0] + (word.substring(1)).toLowerCase();
+      }
+    }
+    author = sections.join(' ');
+    
+    footnotePara.innerHTML = "from <i>" + title + "</i> by " + author;
+    res.append(footnotePara);
+    return res;
   }
 
 }
