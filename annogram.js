@@ -169,9 +169,10 @@ class Annogram {
     targetDiv.classList.add("asLineAnimationContainer");
     let width = opts.width || 800;
     let height = opts.height || 400;
-    targetDiv.style.minHeight = height + 'px';
+    targetDiv.style.height = height + 'px';
     targetDiv.style.width = width + "px";
     opts.width = width;
+    opts.height = height;
     this._animation(poem, targetDiv, opts);
     return targetDiv;
   }
@@ -181,6 +182,7 @@ class Annogram {
     let fadeInMs = opts.fadeInMs || 100;
     let paragraphIndent = opts.paragraphIndent || 0;
     let warpIndent = opts.warpIndent || 8;
+    let autoScroll = opts.autoScroll;
     const delay = function (n) {
       return new Promise(function (resolve) {
         setTimeout(resolve, n);
@@ -258,6 +260,9 @@ class Annogram {
       targetDiv.append(thisLineSpan);
       thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
+      if (autoScroll) {
+        thisLineSpan.parentNode.scrollTop = thisLineSpan.offsetTop - thisLineSpan.parentNode.offsetTop;
+      }
       await delay(delayMs);
     }
   }
