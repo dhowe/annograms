@@ -261,7 +261,7 @@ class Annogram {
       thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
       if (autoScroll) {
-        thisLineSpan.scrollIntoView(false, {behavior: "smooth"});
+        thisLineSpan.scrollIntoView(false, {behavior: "smooth", block: "nearest", inline: "nearest"});
       }
       await delay(delayMs);
     }
