@@ -204,7 +204,7 @@ class Annogram {
     const calculateMaxLineNo = function(firstLineSpan, h, debug){
       let lineHeight = window.getComputedStyle(firstLineSpan).lineHeight;
       lineHeight = lineHeight.replace(/px/g, "");
-      lineHeight = parseFloat(lineHeight);
+      lineHeight = Math.ceil(parseFloat(lineHeight));
       let res =  Math.floor(h/lineHeight);
       if (debug) console.log("Height: " + h + "; lineheihgt: " + lineHeight + "; Max Line no.: " + res);
       return res;
@@ -243,7 +243,7 @@ class Annogram {
           displayedLineNo ++;
           if (autoScroll) {
             if (displayedLineNo > maxLineNo) {
-              for (let index = 0; index < 2; index++) {
+              for (let idx = 0; idx < 2; idx++) {
                 targetDiv.removeChild(targetDiv.firstChild);
               }
             }
@@ -287,7 +287,7 @@ class Annogram {
       displayedLineNo ++;
       if (autoScroll) {
         if (displayedLineNo > maxLineNo) {
-          for (let index = 0; index < 2; index++) {
+          for (let idx = 0; idx < 2; idx++) {
             targetDiv.removeChild(targetDiv.firstChild);
           }
         }
