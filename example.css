@@ -7,7 +7,6 @@
 .asLineAnimationContainer{
   font-size: smaller;
   line-height: 80%;
-  overflow-y: auto;
 }
 
 .meta{

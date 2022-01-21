@@ -200,10 +200,18 @@ class Annogram {
       }
       return no - 1;
     }
+
+    const calculateMaxLineNo = function(firstLineSpan, h, debug){
+      let res =  Math.floor(h/firstLineSpan.clientHeight);
+      if (debug) console.log("Max Line no.: " + res);
+      return res;
+    }
+
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
     let targetFont;
     let characterPerLine = Number.MAX_SAFE_INTEGER;
+    let maxLineNo = Number.MAX_SAFE_INTEGER;
 
     while (targetDiv.firstChild) {
       targetDiv.removeChild(targetDiv.firstChild);
@@ -218,6 +226,9 @@ class Annogram {
         let computedStyle = window.getComputedStyle(targetDiv.firstChild);
         targetFont = computedStyle.getPropertyValue("font-size") + " " + computedStyle.getPropertyValue("font-family");
         characterPerLine = calculateMaxCharacterNoPerLine(targetFont, opts.width, opts.debug);
+        if (autoScroll) {
+          maxLineNo = calculateMaxLineNo(targetDiv.firstChild, opts.height, opts.debug);
+        }
       }
       let line = lines[i];
       if (line[0] !== ' ') {
@@ -261,7 +272,11 @@ class Annogram {
       thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
       if (autoScroll) {
-        thisLineSpan.parentNode.scrollTop = thisLineSpan.offsetTop - thisLineSpan.parentNode.offsetTop;
+        if (i > maxLineNo - 1) {
+          for (let index = 0; index <2; index++) {
+            targetDiv.removeChild(targetDiv.firstChild);
+          }
+        }
       }
       await delay(delayMs);
     }
