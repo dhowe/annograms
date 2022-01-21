@@ -241,6 +241,13 @@ class Annogram {
           targetDiv.append(document.createElement("span"));
           targetDiv.append(document.createElement("br"));
           displayedLineNo ++;
+          if (autoScroll) {
+            if (displayedLineNo > maxLineNo) {
+              for (let index = 0; index < 2; index++) {
+                targetDiv.removeChild(targetDiv.firstChild);
+              }
+            }
+          }
         }
       }
       if (paragraphIndent > 0) {
@@ -280,7 +287,7 @@ class Annogram {
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
       if (autoScroll) {
         if (displayedLineNo > maxLineNo) {
-          for (let index = 0; index <2; index++) {
+          for (let index = 0; index < 2; index++) {
             targetDiv.removeChild(targetDiv.firstChild);
           }
         }
