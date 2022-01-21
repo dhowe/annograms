@@ -221,6 +221,7 @@ class Annogram {
     }
 
     let currentWrapIndentCursor = 0;
+    let displayedLineNo = 0;
 
     for (let i = 0; i < lines.length; i++) {
 
@@ -273,9 +274,13 @@ class Annogram {
       thisLineSpan.append(textDisplay);
       targetDiv.append(thisLineSpan);
       thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
-      if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
+      displayedLineNo ++;
+      if (i < lines.length - 1) {
+        targetDiv.append(document.createElement("br"));
+        displayedLineNo ++;
+      }
       if (autoScroll) {
-        if (i > maxLineNo - 1) {
+        if (displayedLineNo > maxLineNo) {
           for (let index = 0; index <2; index++) {
             targetDiv.removeChild(targetDiv.firstChild);
           }
