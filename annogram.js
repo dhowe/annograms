@@ -206,7 +206,7 @@ class Annogram {
       lineHeight = lineHeight.replace(/px/g, "");
       lineHeight = parseFloat(lineHeight);
       let res =  Math.floor(h/lineHeight);
-      if (debug) console.log("Height: " + h + " ;lineheihgt: " + lineHeight + " ;Max Line no.: " + res);
+      if (debug) console.log("Height: " + h + "; lineheihgt: " + lineHeight + "; Max Line no.: " + res);
       return res;
     }
 
@@ -238,6 +238,7 @@ class Annogram {
       if (line[0] !== ' ') {
         currentWrapIndentCursor = 0;
         if (i > 0) {
+          targetDiv.append(document.createElement("span"));
           targetDiv.append(document.createElement("br"));
           displayedLineNo ++;
         }
