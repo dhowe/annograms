@@ -168,7 +168,7 @@ class Annogram {
     let targetDiv = document.createElement("div");
     targetDiv.classList.add("asLineAnimationContainer");
     let width = opts.width || 800;
-    let height = opts.height || 400;
+    let height = opts.height || 250;
     targetDiv.style.height = height + 'px';
     targetDiv.style.width = width + "px";
     opts.width = width;
@@ -200,16 +200,28 @@ class Annogram {
       }
       return no - 1;
     }
+
+    const calculateMaxLineNo = function(firstLineSpan, h, debug){
+      let lineHeight = window.getComputedStyle(firstLineSpan).lineHeight;
+      lineHeight = lineHeight.replace(/px/g, "");
+      lineHeight = Math.ceil(parseFloat(lineHeight));
+      let res =  Math.floor(h/lineHeight);
+      if (debug) console.log("Height: " + h + "; lineheihgt: " + lineHeight + "; Max Line no.: " + res);
+      return res;
+    }
+
     const lines = this.asLines(poem);
     if (lines.length !== poem.meta.length) throw Error("Invaild lines from poem")
     let targetFont;
     let characterPerLine = Number.MAX_SAFE_INTEGER;
+    let maxLineNo = Number.MAX_SAFE_INTEGER;
 
     while (targetDiv.firstChild) {
       targetDiv.removeChild(targetDiv.firstChild);
     }
 
     let currentWrapIndentCursor = 0;
+    let displayedLineNo = 0;
 
     for (let i = 0; i < lines.length; i++) {
 
@@ -218,12 +230,24 @@ class Annogram {
         let computedStyle = window.getComputedStyle(targetDiv.firstChild);
         targetFont = computedStyle.getPropertyValue("font-size") + " " + computedStyle.getPropertyValue("font-family");
         characterPerLine = calculateMaxCharacterNoPerLine(targetFont, opts.width, opts.debug);
+        if (autoScroll) {
+          maxLineNo = calculateMaxLineNo(targetDiv.firstChild, opts.height, opts.debug);
+        }
       }
       let line = lines[i];
       if (line[0] !== ' ') {
         currentWrapIndentCursor = 0;
         if (i > 0) {
+          targetDiv.append(document.createElement("span"));
           targetDiv.append(document.createElement("br"));
+          displayedLineNo ++;
+          if (autoScroll) {
+            if (displayedLineNo > maxLineNo) {
+              for (let idx = 0; idx < 2; idx++) {
+                targetDiv.removeChild(targetDiv.firstChild);
+              }
+            }
+          }
         }
       }
       if (paragraphIndent > 0) {
@@ -260,8 +284,13 @@ class Annogram {
       targetDiv.append(thisLineSpan);
       thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
+      displayedLineNo ++;
       if (autoScroll) {
-        thisLineSpan.parentNode.scrollTop = thisLineSpan.offsetTop - thisLineSpan.parentNode.offsetTop;
+        if (displayedLineNo > maxLineNo) {
+          for (let idx = 0; idx < 2; idx++) {
+            targetDiv.removeChild(targetDiv.firstChild);
+          }
+        }
       }
       await delay(delayMs);
     }
