@@ -202,7 +202,7 @@ class Annogram {
     }
 
     const calculateMaxLineNo = function(firstLineSpan, h, debug){
-      let res =  Math.floor(h/firstLineSpan.clientHeight);
+      let res =  Math.floor(h/firstLineSpan.offsetHeight);
       if (debug) console.log("Max Line no.: " + res);
       return res;
     }
