@@ -87,7 +87,7 @@ class Annogram {
     for (let i = 0; i < poem.meta.length; i++) {
       let m = poem.meta[i];
       let phrase = this.RiTa.untokenize(m.tokens);
-      if (/^[,;:.]/.test(phrase)) {             // hide leading punct
+      if (this.RiTa.isPunct(phrase[0])) {             // hide leading punct
         phrase = ' ' + phrase.slice(1);
         indent -= 1;
       }
