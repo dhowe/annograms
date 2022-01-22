@@ -169,8 +169,13 @@ class Annogram {
     targetDiv.classList.add("asLineAnimationContainer");
     let width = opts.width || 800;
     let height = opts.height || 250;
-    targetDiv.style.height = height + 'px';
     targetDiv.style.width = width + "px";
+    if (opts.autoScroll){
+      targetDiv.style.height = height + 'px';
+    } else {
+      targetDiv.style.minHeight = height + 'px';
+
+    }
     opts.width = width;
     opts.height = height;
     this._animation(poem, targetDiv, opts);
