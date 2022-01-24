@@ -188,6 +188,7 @@ class Annogram {
     let paragraphIndent = opts.paragraphIndent || 0;
     let warpIndent = opts.warpIndent || 8;
     let autoScroll = opts.autoScroll;
+    let cleanLB = opts.cleanLB;
     const delay = function (n) {
       return new Promise(function (resolve) {
         setTimeout(resolve, n);
@@ -227,6 +228,7 @@ class Annogram {
 
     let currentWrapIndentCursor = 0;
     let displayedLineNo = 0;
+    let currentCleanLBCursor = 0;
 
     for (let i = 0; i < lines.length; i++) {
 
@@ -239,6 +241,7 @@ class Annogram {
           maxLineNo = calculateMaxLineNo(targetDiv.firstChild, opts.height, opts.debug);
         }
       }
+      //
       let line = lines[i];
       if (line[0] !== ' ') {
         currentWrapIndentCursor = 0;
@@ -254,7 +257,22 @@ class Annogram {
             }
           }
         }
+        // clean LB
+        if (/[^.?!]+[.!?][^.?!]+/.test(line.trim())){
+          const endPunctRE = /[.?!]/g;
+          while(endPunctRE.exec(line) !== null){
+          }
+          currentCleanLBCursor = endPunctRE.lastIndex;
+        } else {
+          currentCleanLBCursor = 0;
+        }
       }
+
+      // clean LB
+      if (currentCleanLBCursor > 0) {
+        line = line.substring(currentCleanLBCursor);
+      }
+
       if (paragraphIndent > 0) {
         line = ' '.repeat(paragraphIndent) + line;
       }
