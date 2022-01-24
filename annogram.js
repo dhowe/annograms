@@ -263,6 +263,7 @@ class Annogram {
           while(endPunctRE.exec(line) !== null){
           }
           currentCleanLBCursor = endPunctRE.lastIndex;
+          if (opts.debug) console.log("CleanLB indent: " + currentCleanLBCursor + " units.");
         } else {
           currentCleanLBCursor = 0;
         }
