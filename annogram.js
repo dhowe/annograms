@@ -260,7 +260,9 @@ class Annogram {
         // clean LB
         if (/[^.?!]+[.!?][^.?!]+/.test(line.trim())){
           const endPunctRE = /[.?!]/g;
-          while(endPunctRE.exec(line) !== null){
+          let arr;
+          while((arr = endPunctRE.exec(line)) !== null){
+            if (opts.debug) console.log("cleanLB: Found " + arr[0] + " at " + (endPunctRE.lastIndex - 1));
           }
           currentCleanLBCursor = endPunctRE.lastIndex;
           if (opts.debug) console.log("CleanLB indent: " + currentCleanLBCursor + " units.");
