@@ -259,7 +259,7 @@ class Annogram {
         }
         // clean LB
         if (/[^.?!]+[.!?][^.?!]+/.test(line.trim())){
-          const endPunctRE = /[.?!]/g;
+          let endPunctRE = /[.?!]/g;
           let arr;
           while((arr = endPunctRE.exec(line)) !== null){
             if (opts.debug) console.log("cleanLB: Found " + arr[0] + " at " + (endPunctRE.lastIndex - 1));
