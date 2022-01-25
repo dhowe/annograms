@@ -188,6 +188,7 @@ class Annogram {
     let paragraphIndent = opts.paragraphIndent || 0;
     let warpIndent = opts.warpIndent || 8;
     let autoScroll = opts.autoScroll;
+    let cleanLB = opts.cleanLB;
     const delay = function (n) {
       return new Promise(function (resolve) {
         setTimeout(resolve, n);
@@ -227,6 +228,7 @@ class Annogram {
 
     let currentWrapIndentCursor = 0;
     let displayedLineNo = 0;
+    let currentCleanLBCursor = 0;
 
     for (let i = 0; i < lines.length; i++) {
 
@@ -239,6 +241,7 @@ class Annogram {
           maxLineNo = calculateMaxLineNo(targetDiv.firstChild, opts.height, opts.debug);
         }
       }
+      //
       let line = lines[i];
       if (line[0] !== ' ') {
         currentWrapIndentCursor = 0;
@@ -254,7 +257,25 @@ class Annogram {
             }
           }
         }
+        // clean LB
+        if (/[^.?!]+[.!?][^.?!]+/.test(line.trim())){
+          let endPunctRE = /[.?!]/g;
+          let arr;
+          while((arr = endPunctRE.exec(line)) !== null){
+            if (opts.debug) console.log("cleanLB: Found " + arr[0] + " at " + (endPunctRE.lastIndex - 1));
+            currentCleanLBCursor = endPunctRE.lastIndex + 1;
+          }
+          if (opts.debug) console.log("CleanLB indent: " + currentCleanLBCursor + " units.");
+        } else {
+          currentCleanLBCursor = 0;
+        }
       }
+
+      // clean LB
+      if (currentCleanLBCursor > 0) {
+        line = line.substring(currentCleanLBCursor);
+      }
+
       if (paragraphIndent > 0) {
         line = ' '.repeat(paragraphIndent) + line;
       }
@@ -391,6 +412,6 @@ class Annogram {
 }
 
 Annogram.lb = '<p>';
-Annogram.VERSION = '0.13'//version; import {version} from './package.json';
+Annogram.VERSION = '0.14'//version; import {version} from './package.json';
 
 export { Annogram };
