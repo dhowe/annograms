@@ -58,7 +58,7 @@ class Annogram {
 
       if (words[i] === Annogram.lb) {
         if (tokens.length) addMeta(i);
-        words.splice(i,1); // delete LB instead of jumping over to calculate "start" correctly
+        words.splice(i, 1); // delete LB instead of jumping over to calculate "start" correctly
         tokens = words.slice(i, i + n);
         src = this._lookupSource(tokens, { text, index: i })[0];
         i += n;
@@ -113,7 +113,7 @@ class Annogram {
     return result;
   }
 
-  asHtml(poem) { 
+  asHtml(poem) {
     let cursor = 0;
     let resultDiv = document.createElement("div");
     resultDiv.classList.add("display");
@@ -164,13 +164,13 @@ class Annogram {
     return resultDiv;
   }
 
-  asLineAnimation(poem, opts={}){
+  asLineAnimation(poem, opts = {}) {
     let targetDiv = document.createElement("div");
     targetDiv.classList.add("asLineAnimationContainer");
     let width = opts.width || 800;
     let height = opts.height || 250;
     targetDiv.style.width = width + "px";
-    if (opts.autoScroll){
+    if (opts.autoScroll) {
       targetDiv.style.height = height + 'px';
     } else {
       targetDiv.style.minHeight = height + 'px';
@@ -182,7 +182,7 @@ class Annogram {
     return targetDiv;
   }
 
-  async _animation(poem, targetDiv, opts={}) {
+  async _animation(poem, targetDiv, opts = {}) {
     let delayMs = opts.delayMs || 500;
     let fadeInMs = opts.fadeInMs || 100;
     let paragraphIndent = opts.paragraphIndent || 0;
@@ -195,23 +195,23 @@ class Annogram {
       });
     }
 
-    const calculateMaxCharacterNoPerLine = function(font, w, debug) {
+    const calculateMaxCharacterNoPerLine = function (font, w, debug) {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext('2d');
       ctx.font = font;
       if (debug) console.log(ctx.font);
       let no = 1;
-      while((ctx.measureText(' '.repeat(no)).width) < w ) {
-        no ++;
+      while ((ctx.measureText(' '.repeat(no)).width) < w) {
+        no++;
       }
       return no - 1;
     }
 
-    const calculateMaxLineNo = function(firstLineSpan, h, debug){
+    const calculateMaxLineNo = function (firstLineSpan, h, debug) {
       let lineHeight = window.getComputedStyle(firstLineSpan).lineHeight;
       lineHeight = lineHeight.replace(/px/g, "");
       lineHeight = Math.ceil(parseFloat(lineHeight));
-      let res =  Math.floor(h/lineHeight);
+      let res = Math.floor(h / lineHeight);
       if (debug) console.log("Height: " + h + "; lineheihgt: " + lineHeight + "; Max Line no.: " + res);
       return res;
     }
@@ -248,7 +248,7 @@ class Annogram {
         if (i > 0) {
           targetDiv.append(document.createElement("span"));
           targetDiv.append(document.createElement("br"));
-          displayedLineNo ++;
+          displayedLineNo++;
           if (autoScroll) {
             if (displayedLineNo > maxLineNo) {
               for (let idx = 0; idx < 2; idx++) {
@@ -258,10 +258,10 @@ class Annogram {
           }
         }
         // clean LB
-        if (/[^.?!]+[.!?][^.?!]+/.test(line.trim())){
+        if (/[^.?!]+[.!?][^.?!]+/.test(line.trim())) {
           let endPunctRE = /[.?!]/g;
           let arr;
-          while((arr = endPunctRE.exec(line)) !== null){
+          while ((arr = endPunctRE.exec(line)) !== null) {
             if (opts.debug) console.log("cleanLB: Found " + arr[0] + " at " + (endPunctRE.lastIndex - 1));
             currentCleanLBCursor = endPunctRE.lastIndex + 1;
           }
@@ -282,7 +282,7 @@ class Annogram {
       line = line.substring(currentWrapIndentCursor);
       if (line.length > characterPerLine) {
         let temArr = /^\s+/.exec(line);
-        if (temArr){
+        if (temArr) {
           let totalSpaceLength = temArr[0].length;
           line = line.substring(totalSpaceLength - (paragraphIndent + warpIndent));
           currentWrapIndentCursor += totalSpaceLength - (paragraphIndent + warpIndent);
@@ -303,14 +303,14 @@ class Annogram {
       textDisplay.href = "javascript:void(0)";
       let txt = line.replace(/^\s+/, "");
 
-      let sourceDiv = this._createSourceDiv(txt,src);
+      let sourceDiv = this._createSourceDiv(txt, src);
       textDisplay.append(txt);
       textDisplay.append(sourceDiv);
       thisLineSpan.append(textDisplay);
       targetDiv.append(thisLineSpan);
       thisLineSpan.animate({ opacity: [0, 1] }, fadeInMs);
       if (i < lines.length - 1) targetDiv.append(document.createElement("br"));
-      displayedLineNo ++;
+      displayedLineNo++;
       if (autoScroll) {
         if (displayedLineNo > maxLineNo) {
           for (let idx = 0; idx < 2; idx++) {
@@ -324,13 +324,16 @@ class Annogram {
 
   _lookupSource(tokens, dbugInfo) {
     let phrase = this.RiTa.untokenize(tokens);
-    let srcs = this.source.filter(p => p.text.includes(phrase));
-    if (!srcs || !srcs.length) throw Error("(" + dbugInfo.index +") No source for \"" + phrase + "\"\n\n" + dbugInfo.text);
+    let rePre = this.RiTa.isPunct(phrase[0]) ? '' : '(^|\\W)';
+    let phraseRE = new RegExp(rePre + phrase + '(\\W|$)');
+    let srcs = this.source.filter(p => phraseRE.test(p.text));
+    if (!srcs || !srcs.length) throw Error("(" + dbugInfo.index
+      + ") No source for \"" + phrase + "\"\nin\n" + dbugInfo.text);
     srcs.sort((a, b) => a.id - b.id);
     return srcs;
   }
 
-  _createSourceDiv(txt, src, opts={}){
+  _createSourceDiv(txt, src, opts = {}) {
     let res = document.createElement("div");
     res.classList.add("source");
     let regexStr = txt.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
@@ -403,7 +406,7 @@ class Annogram {
       }
     }
     author = sections.join(' ');
-    
+
     footnotePara.innerHTML = "from <i>" + title + "</i> by " + author;
     res.append(footnotePara);
     return res;

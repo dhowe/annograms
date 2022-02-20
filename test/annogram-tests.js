@@ -26,6 +26,129 @@ describe('Annograms', function () {
       assert.equal(poemText, poem.text.replace('<p>', ''));
     });
 
+    it('should use correct RE in lookupSource', function () {
+      let phrase, phraseRE, tests, matching;
+      
+      let rePre = '(^|\\W)', rePost = '(\\W|$)';
+      phrase = ", the last,";
+      if (RiTa.isPunct(phrase[0])) rePre = '';
+      phraseRE = new RegExp(rePre+phrase+rePost);
+      tests = [
+        "My father died at the age, eighty. One, the last, things he did.",
+        "One, the last, things he did.",
+        "One, the last,, he did.",
+        "One, the last,: he did.",
+        "One, the last,; he did.",
+        "It was One, the last,",
+        "It was One, the last, things",
+        "One, the last,.",
+        "One, the last,,",
+        "One, the last,:",
+        "One, the last,;",
+        "One, the last,!",
+        "One, the last,?",
+        "One, the last,-",
+        "One, the last,",
+        //////////////////////////////////////////
+        "One, the last,ing", // false
+        "", // false
+        "blah", // false
+        "ne of the last" // false
+      ];
+
+      matching = tests.filter(p => phraseRE.test(p));
+      //matching.forEach((s,i) => console.log(i,s));
+      assert.equal(matching.length, tests.length-4);
+
+      rePre = '(^|\\W)';
+      rePost = '(\\W|$)';
+      phrase = ", the last";
+      if (RiTa.isPunct(phrase[0])) rePre = '';
+      phraseRE = new RegExp(rePre+phrase+rePost);
+      tests = [
+        "My father died at the age, eighty. One, the last things he did.",
+        "One, the last things he did.",
+        "One, the last, he did.",
+        "One, the last: he did.",
+        "One, the last; he did.",
+        "It was One, the last",
+        "It was One, the last things",
+        "One, the last.",
+        "One, the last,",
+        "One, the last:",
+        "One, the last;",
+        "One, the last!",
+        "One, the last?",
+        "One, the last-",
+        "One, the last",
+        //////////////////////////////////////////
+        "One, the lasting", // false
+        "", // false
+        "blah", // false
+        "ne of the last" // false
+      ];
+
+      matching = tests.filter(p => phraseRE.test(p));
+      assert.equal(matching.length, tests.length-4);
+
+
+      phrase = "One of the last";
+      phraseRE = new RegExp(rePre+phrase+rePost);
+      tests = [
+        "My father died at the age of eighty. One of the last things he did.",
+        "One of the last things he did.",
+        "One of the last, he did.",
+        "One of the last: he did.",
+        "One of the last; he did.",
+        "It was One of the last",
+        "It was One of the last things",
+        "One of the last.",
+        "One of the last,",
+        "One of the last:",
+        "One of the last;",
+        "One of the last!",
+        "One of the last?",
+        "One of the last-",
+        "One of the last",
+        //////////////////////////////////////////
+        "One of the lasting", // false
+        "", // false
+        "blah", // false
+        "ne of the last" // false
+      ];
+
+      matching = tests.filter(p => phraseRE.test(p));
+      assert.equal(matching.length, tests.length-4);
+
+      phrase = "of the last,";
+      phraseRE = new RegExp(rePre+phrase+rePost);
+      tests = [
+        " One of the last, things he did.",
+        "One of the last, things he did.",
+        "One of the last,, he did.",
+        "One of the last,: he did.",
+        "One of the last,; he did.",
+        "It was One of the last,",
+        "It was One of the last, things",
+        "One of the last,.",
+        "One of the last,,",
+        "One of the last,:",
+        "One of the last,;",
+        "One of the last,!",
+        "One of the last,?",
+        "One of the last,-",
+        "One of the last,",
+        //////////////////////////////////////////
+        "One of the lasting", // false
+        "", // false
+        "blah", // false
+        "Of the last" // false
+      ];
+
+      matching = tests.filter(p => phraseRE.test(p));
+      assert.equal(matching.length, tests.length-4);
+    });
+
 
     it('should annotate ending punctuation', function () {
       let gen = [
