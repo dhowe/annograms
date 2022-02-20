@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script src="node_modules/rita/dist/rita.js"></script>
+  <script src="poems-html.js"></script>
+  <script src="annogram-html.js"></script>
+  <link rel="stylesheet" href="example.css">
+  <style>
+    a[href] {
+      text-decoration: none;
+      color: #3182bd;
+    }
+
+    a[href]:hover {
+      text-decoration: underline;
+    }
+
+    .display {
+      max-width: 500px;
+      margin: 20px;
+    }
+
+    #ui {
+      margin: 20px
+    }
+  </style>
+  <meta charset="utf-8">
+</head>
+
+<body>
+  <div id="content"></div>
+  <div id="ui">
+    <input id="regen" type="button" value="loading..." onclick="generate(true);" />
+  </div>
+  <script>
+
+    let current, working, next= 0;
+    let worker = new Worker('worker.js')
+    let states = ['loading-first', 'loading-next-no-request', 'loading-next-with-request', 'waiting-for-click'], state = 0;
+
+    worker.onmessage = function (e) {
+      let { poem } = e.data;
+      document.querySelector('#regen').value = 'regenerate';
+      if (state === 0) {
+        console.log('onMessage.STATE[0]');
+        next = poem;
+        showNext();
+        changeToState(1);
+        doWork();
+      }
+      else if (state === 1) {
+        console.log('onMessage.STATE[1]');
+        next = poem;
+        changeToState(3);
+      }
+      else if (state === 2) {
+        console.log('onMessage.STATE[2]');
+        next = poem;
+        showNext();
+        changeToState(1);
+        doWork();
+      }
+      else if (state === 3) {
+        console.log('onMessage.STATE[3]');
+        throw Error('invalid-state');
+      }
+      working = false;
+    };
+
+    function generate() {
+      if (state === 0) {
+        console.log('generate.STATE[0]');
+        doWork();
+      }
+      else if (state === 1) {
+        console.log('generate.STATE[1], waiting on worker+user');
+        //if (wasClick)
+        changeToState(next ? 3 : 2);
+      }
+      else if (state === 2) {
+        
+        // WORKING HERE, not showing when waiting...
+
+        document.querySelector('#regen').value = 'loading...';
+        console.log('generate.STATE[2] ignore, waiting on worker');
+      }
+      else if (state === 3) {
+        console.log('generate.STATE[3], waiting for click');
+        //if (wasClick) 
+        {
+          showNext();
+          changeToState(1);
+          doWork();
+        }
+      }
+
+      // if (working) {
+      //   console.log('already working...');
+      //   return;
+      // }      
+      // if (current && next) {
+      //   console.log('waiting for click...');
+      //   return;
+      // }
+      // if (ready) next = 'requested';
+    }
+
+    function showNext() {
+      if (state === 0) {
+        console.log('showNext.STATE[0]');
+      }
+      else if (state === 1) {
+        console.log('showNext.STATE[1]');
+      }
+      else if (state === 2) {
+        console.log('showNext.STATE[2]');
+      }
+      document.querySelector('#content').appendChild(asHtml(next));
+      next = 0;
+    }
+
+    function changeToState(i) {
+      let pre = state;
+      state = i;
+      console.log('changeState('+pre+'->'+i+')', 'state['+state+']='+states[state]);
+    }
+
+    function doWork() {
+      let genOpts = { minLength: 10 };
+      let consOpts = { maxLengthMatch: 7, trace: 0 };
+      console.log('postMessage', 'state['+state+']='+states[state], 'next:'+next);
+      worker.postMessage({ consOpts, genOpts, poems });
+      working = true;
+    }
+
+    generate();
+    // function generate() {
+    //   let poem = mm.generate(5, { minLength: 10 });
+    //   //console.log('\n' + poem.text + '\n\n' + mm.asText(poem) + '\n\n' + mm.asText(poem, true));
+    //   //console.log(mm.asLines(poem));
+    //   console.log(Annogram.VERSION);
+    //   document.querySelector('#content').appendChild(mm.asHtml(poem));
+    // }
+  </script>
+</body>
+
+</html>

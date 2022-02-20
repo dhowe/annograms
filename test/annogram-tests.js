@@ -7,32 +7,50 @@ describe('Annograms', function () {
   this.timeout(20000);
   this.slow(2000);
 
-
-  describe('#annotate()', function () {
-
-    it('should handle basic breaks', function () {
-      let gen = [
-        'And when he was on the table, she told me that he had walked out on him, the news, which should not be here.',
-        'I choose a piece of paper in the basket, but the dog wasn’t there.',
-        'But I have to gather together all the things in the room, lock the door, halfway against the door, and the others too.',
-        '<p>My wife and I have no way of knowing if they were in the woods that the man disappeared, and that was the end of a small loaf of bread.',
-        'I was scared of the washing machine finished its work' // issue #18 here, should be as below
-        // 'I was scared of the washing machine finished its work.'
-      ];
-      let mm = annogram();
-      let poem = mm.annotate(gen, {});
-      let poemText = mm.asText(poem);
-      //mm.asLines(poem);
-      assert.equal(poemText, poem.text.replace('<p>', ''));
-    });
+  describe('#lookupSource()', function () {
 
     it('should use correct RE in lookupSource', function () {
-      let phrase, phraseRE, tests, matching;
-      
-      let rePre = '(^|\\W)', rePost = '(\\W|$)';
+
+      let phrase, phraseRE, tests, matching, rePre, rePost;
+      let escapeForRegex = function (string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& is entire match
+      }
+
+      rePre = '(^|\\W)', rePost = '(\\W|$)';
+      phrase = "? the last,";
+      if (RiTa.isPunct(phrase[0])) rePre = '';
+      phraseRE = new RegExp(rePre + escapeForRegex(phrase) + rePost);
+      tests = [
+        "My father died at the age, eighty. One? the last, things he did.",
+        "One? the last, things he did.",
+        "One? the last,, he did.",
+        "One? the last,: he did.",
+        "One? the last,; he did.",
+        "It was One? the last,",
+        "It was One? the last, things",
+        "One? the last,.",
+        "One? the last,,",
+        "One? the last,:",
+        "One? the last,;",
+        "One? the last,!",
+        "One? the last,?",
+        "One? the last,-",
+        "One? the last,",
+        //////////////////////////////////////////
+        "One? the last,ing", // false
+        "", // false
+        "blah", // false
+        "ne of the last" // false
+      ];
+
+      matching = tests.filter(p => phraseRE.test(p));
+      //matching.forEach((s,i) => console.log(i,s));
+      assert.equal(matching.length, tests.length - 4);
+
+      rePre = '(^|\\W)', rePost = '(\\W|$)';
       phrase = ", the last,";
       if (RiTa.isPunct(phrase[0])) rePre = '';
-      phraseRE = new RegExp(rePre+phrase+rePost);
+      phraseRE = new RegExp(rePre + phrase + rePost);
       tests = [
         "My father died at the age, eighty. One, the last, things he did.",
         "One, the last, things he did.",
@@ -58,13 +76,13 @@ describe('Annograms', function () {
 
       matching = tests.filter(p => phraseRE.test(p));
       //matching.forEach((s,i) => console.log(i,s));
-      assert.equal(matching.length, tests.length-4);
+      assert.equal(matching.length, tests.length - 4);
 
       rePre = '(^|\\W)';
       rePost = '(\\W|$)';
       phrase = ", the last";
       if (RiTa.isPunct(phrase[0])) rePre = '';
-      phraseRE = new RegExp(rePre+phrase+rePost);
+      phraseRE = new RegExp(rePre + phrase + rePost);
       tests = [
         "My father died at the age, eighty. One, the last things he did.",
         "One, the last things he did.",
@@ -89,11 +107,11 @@ describe('Annograms', function () {
       ];
 
       matching = tests.filter(p => phraseRE.test(p));
-      assert.equal(matching.length, tests.length-4);
+      assert.equal(matching.length, tests.length - 4);
 
 
       phrase = "One of the last";
-      phraseRE = new RegExp(rePre+phrase+rePost);
+      phraseRE = new RegExp(rePre + phrase + rePost);
       tests = [
         "My father died at the age of eighty. One of the last things he did.",
         "One of the last things he did.",
@@ -118,10 +136,10 @@ describe('Annograms', function () {
       ];
 
       matching = tests.filter(p => phraseRE.test(p));
-      assert.equal(matching.length, tests.length-4);
+      assert.equal(matching.length, tests.length - 4);
 
       phrase = "of the last,";
-      phraseRE = new RegExp(rePre+phrase+rePost);
+      phraseRE = new RegExp(rePre + phrase + rePost);
       tests = [
         " One of the last, things he did.",
         "One of the last, things he did.",
@@ -146,8 +164,29 @@ describe('Annograms', function () {
       ];
 
       matching = tests.filter(p => phraseRE.test(p));
-      assert.equal(matching.length, tests.length-4);
+      assert.equal(matching.length, tests.length - 4);
     });
+
+  });
+
+  describe('#annotate()', function () {
+
+    it('should handle basic breaks', function () {
+      let gen = [
+        'And when he was on the table, she told me that he had walked out on him, the news, which should not be here.',
+        'I choose a piece of paper in the basket, but the dog wasn’t there.',
+        'But I have to gather together all the things in the room, lock the door, halfway against the door, and the others too.',
+        '<p>My wife and I have no way of knowing if they were in the woods that the man disappeared, and that was the end of a small loaf of bread.',
+        'I was scared of the washing machine finished its work' // issue #18 here, should be as below
+        // 'I was scared of the washing machine finished its work.'
+      ];
+      let mm = annogram();
+      let poem = mm.annotate(gen, {});
+      let poemText = mm.asText(poem);
+      //mm.asLines(poem);
+      assert.equal(poemText, poem.text.replace('<p>', ''));
+    });
+
 
 
     it('should annotate ending punctuation', function () {
@@ -173,25 +212,25 @@ describe('Annograms', function () {
           "end": 5
         },
         {
-          "tokens": [ "no", "one", "knows", ",", "perhaps", "not"],
+          "tokens": ["no", "one", "knows", ",", "perhaps", "not"],
           "sourceId": 491,
           "start": 6,
           "end": 8
         },
         {
-          "tokens": [ ",", "perhaps", "not", "at", "all", ","],
+          "tokens": [",", "perhaps", "not", "at", "all", ","],
           "sourceId": 412,
           "start": 9,
           "end": 11
         },
         {
-          "tokens": [ "at", "all", ",", "but", "a"],
+          "tokens": ["at", "all", ",", "but", "a"],
           "sourceId": 192,
           "start": 12,
           "end": 13
         },
         {
-          "tokens": [ ",", "but", "a", "dream", "of"],
+          "tokens": [",", "but", "a", "dream", "of"],
           "sourceId": 88,
           "start": 14,
           "end": 15
@@ -209,13 +248,13 @@ describe('Annograms', function () {
           "end": 22
         },
         {
-          "tokens": ["sitting","at", "the", "table", ","],
+          "tokens": ["sitting", "at", "the", "table", ","],
           "sourceId": 17,
           "start": 23,
           "end": 24
         },
         {
-          "tokens": ["the","table",",","she"],
+          "tokens": ["the", "table", ",", "she"],
           "sourceId": 456,
           "start": 25,
           "end": 25

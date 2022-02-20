@@ -113,56 +113,6 @@ class Annogram {
     return result;
   }
 
-  asHtml(poem) {
-    let cursor = 0;
-    let resultDiv = document.createElement("div");
-    resultDiv.classList.add("display");
-    let noBreakWrap;
-
-    for (let i = 0; i < poem.meta.length; i++) {
-      let m = poem.meta[i];
-
-      // Note that some meta elements may have id = -1
-      // which means they shouldn't get a highlight
-      if (m.sourceId < 0) throw Error('TODO: handle sourceId == -1');
-
-      let toks = m.tokens.slice(cursor - m.start);
-      let src = this.source.find(p => p.id === m.sourceId);
-      if (!src) throw Error('No source for sourceId #' + m.sourceId);
-
-      let next = this.RiTa.untokenize(toks);
-      let nextForSourceSearch = this.RiTa.untokenize(m.tokens);
-      if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
-
-      let sourceDiv = this._createSourceDiv(nextForSourceSearch, src);
-
-      let thisSegment = document.createElement("a");
-      thisSegment.classList.add("meta");
-      thisSegment.href = "javascript:void(0)";
-      thisSegment.append(next);
-      thisSegment.append(sourceDiv);
-      //prevent lb on punctuations
-      let nextToks = i < poem.meta.length - 1 ? poem.meta[i + 1].tokens.slice
-        (cursor + toks.length - poem.meta[i + 1].start) : undefined;
-      if (nextToks && this.RiTa.isPunct(this.RiTa.untokenize(nextToks)[0])) {
-        if (typeof noBreakWrap === "undefined") {
-          noBreakWrap = document.createElement("span");
-          noBreakWrap.classList.add("noBreakWrap");
-        }
-        noBreakWrap.append(thisSegment);
-      } else if (typeof noBreakWrap !== "undefined") {
-        noBreakWrap.append(thisSegment);
-        resultDiv.append(noBreakWrap);
-        noBreakWrap = undefined;
-      } else {
-        resultDiv.append(thisSegment);
-      }
-
-      cursor += toks.length;
-    }
-
-    return resultDiv;
-  }
 
   asLineAnimation(poem, opts = {}) {
     let targetDiv = document.createElement("div");
@@ -321,7 +271,7 @@ class Annogram {
       await delay(delayMs);
     }
   }
-
+  
   _lookupSource(tokens, dbugInfo) {
     let escapeForRegex = (str) => { // $& is entire match
       return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
@@ -335,89 +285,139 @@ class Annogram {
     srcs.sort((a, b) => a.id - b.id);
     return srcs;
   }
+  
+}
 
-  _createSourceDiv(txt, src, opts = {}) {
-    let res = document.createElement("div");
-    res.classList.add("source");
-    let regexStr = txt.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
-    if (/[A-Za-z]/.test(txt[0])) regexStr = "(?<![A-Za-z])" + regexStr;
-    if (/[A-Za-z]/.test(txt[txt.length - 1])) regexStr += "(?![A-Za-z])";
+function createSourceDiv(txt, src, opts = {}) {
+  let res = document.createElement("div");
+  res.classList.add("source");
+  let regexStr = txt.replace(/[.*+?^{}$()|[\]\\]/g, '\\$&');
+  if (/[A-Za-z]/.test(txt[0])) regexStr = "(?<![A-Za-z])" + regexStr;
+  if (/[A-Za-z]/.test(txt[txt.length - 1])) regexStr += "(?![A-Za-z])";
 
-    const regex = new RegExp(regexStr);
-    let inOriginIndexFrom = (regex.exec(src.text))
-      ? (regex.exec(src.text)).index : src.text.indexOf(txt);
-    let inOriginIndexTo = inOriginIndexFrom + txt.length;
-    // 140 characters before and after
-    const targetCharacterNo = 140;
-    let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
-    let after = "", afterStartIndex = inOriginIndexTo;
-    while (addedCharacterCount < targetCharacterNo) {
-      if (beforeStartIndex < 0 && afterStartIndex > src.text.length - 1) {
-        break;
-      }
-      if (beforeStartIndex >= 0) {
-        before = src.text[beforeStartIndex] + before;
-        addedCharacterCount++;
-        beforeStartIndex--;
-      }
-      if (addedCharacterCount >= targetCharacterNo) break;
-      if (afterStartIndex <= src.text.length - 1) {
-        after += src.text[afterStartIndex];
-        afterStartIndex++;
-        addedCharacterCount++;
-      }
+  const regex = new RegExp(regexStr);
+  let inOriginIndexFrom = (regex.exec(src.text))
+    ? (regex.exec(src.text)).index : src.text.indexOf(txt);
+  let inOriginIndexTo = inOriginIndexFrom + txt.length;
+  // 140 characters before and after
+  const targetCharacterNo = 140;
+  let before = "", beforeStartIndex = inOriginIndexFrom - 1, addedCharacterCount = 0;
+  let after = "", afterStartIndex = inOriginIndexTo;
+  while (addedCharacterCount < targetCharacterNo) {
+    if (beforeStartIndex < 0 && afterStartIndex > src.text.length - 1) {
+      break;
     }
-
-    if (beforeStartIndex > 0) {
-      before = before.replace(/^\S*\s/, "... ");
-    } else if (beforeStartIndex === 0) {
-      before = src.text[0] + before;
+    if (beforeStartIndex >= 0) {
+      before = src.text[beforeStartIndex] + before;
+      addedCharacterCount++;
+      beforeStartIndex--;
     }
-
-    if (afterStartIndex < src.text.length - 1) {
-      after = after.replace(/\s+\S*$/, " ...");
-    } else if (afterStartIndex === src.text.length - 1) {
-      after += src.text[src.text.length - 1];
+    if (addedCharacterCount >= targetCharacterNo) break;
+    if (afterStartIndex <= src.text.length - 1) {
+      after += src.text[afterStartIndex];
+      afterStartIndex++;
+      addedCharacterCount++;
     }
-
-    let spans = [];
-    let beforeSpan = document.createElement("span");
-    beforeSpan.classList.add("sourceText");
-    beforeSpan.append(before);
-    spans.push(beforeSpan);
-    let nextSpan = document.createElement("span");
-    nextSpan.classList.add("sourceHighlight");
-    nextSpan.append(txt);
-    spans.push(nextSpan);
-    let afterSpan = document.createElement("span");
-    afterSpan.classList.add("sourceText");
-    afterSpan.append(after);
-    spans.push(afterSpan);
-
-    res.append(...spans);
-
-    // handle titles starting with 'from'
-    let title = src.title.trim().replace(/^[Ff]rom /, '');
-    let footnotePara = document.createElement("p");
-    footnotePara.classList.add("sourceFootnote");
-    let author = src.author;
-    let sections = author.split(' ');
-    for (let i = 0; i < sections.length; i++) {
-      let word = sections[i];
-      if (/^[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
-        sections[i] = word[0] + (word.substring(1)).toLowerCase();
-      }
-    }
-    author = sections.join(' ');
-
-    footnotePara.innerHTML = "from <i>" + title + "</i> by " + author;
-    res.append(footnotePara);
-    return res;
   }
 
+  if (beforeStartIndex > 0) {
+    before = before.replace(/^\S*\s/, "... ");
+  } else if (beforeStartIndex === 0) {
+    before = src.text[0] + before;
+  }
+
+  if (afterStartIndex < src.text.length - 1) {
+    after = after.replace(/\s+\S*$/, " ...");
+  } else if (afterStartIndex === src.text.length - 1) {
+    after += src.text[src.text.length - 1];
+  }
+
+  let spans = [];
+  let beforeSpan = document.createElement("span");
+  beforeSpan.classList.add("sourceText");
+  beforeSpan.append(before);
+  spans.push(beforeSpan);
+  let nextSpan = document.createElement("span");
+  nextSpan.classList.add("sourceHighlight");
+  nextSpan.append(txt);
+  spans.push(nextSpan);
+  let afterSpan = document.createElement("span");
+  afterSpan.classList.add("sourceText");
+  afterSpan.append(after);
+  spans.push(afterSpan);
+
+  res.append(...spans);
+
+  // handle titles starting with 'from'
+  let title = src.title.trim().replace(/^[Ff]rom /, '');
+  let footnotePara = document.createElement("p");
+  footnotePara.classList.add("sourceFootnote");
+  let author = src.author;
+  let sections = author.split(' ');
+  for (let i = 0; i < sections.length; i++) {
+    let word = sections[i];
+    if (/^[A-Z\u00C0-\u00DC-’]+$/.test(word)) {
+      sections[i] = word[0] + (word.substring(1)).toLowerCase();
+    }
+  }
+  author = sections.join(' ');
+
+  footnotePara.innerHTML = "from <i>" + title + "</i> by " + author;
+  res.append(footnotePara);
+  return res;
+}
+
+function asHtml(poem) {
+  let cursor = 0;
+  let resultDiv = document.createElement("div");
+  resultDiv.classList.add("display");
+  let noBreakWrap;
+
+  for (let i = 0; i < poem.meta.length; i++) {
+    let m = poem.meta[i];
+
+    // Note that some meta elements may have id = -1
+    // which means they shouldn't get a highlight
+    if (m.sourceId < 0) throw Error('TODO: handle sourceId == -1');
+
+    let toks = m.tokens.slice(cursor - m.start);
+    let src = poems.find(p => p.id === m.sourceId);
+    if (!src) throw Error('No source for sourceId #' + m.sourceId);
+
+    let next = this.RiTa.untokenize(toks);
+    let nextForSourceSearch = this.RiTa.untokenize(m.tokens);
+    if (!this.RiTa.isPunct(next[0])) resultDiv.append(' ');
+
+    let sourceDiv = createSourceDiv(nextForSourceSearch, src);
+
+    let thisSegment = document.createElement("a");
+    thisSegment.classList.add("meta");
+    thisSegment.href = "javascript:void(0)";
+    thisSegment.append(next);
+    thisSegment.append(sourceDiv);
+    //prevent lb on punctuations
+    let nextToks = i < poem.meta.length - 1 ? poem.meta[i + 1].tokens.slice
+      (cursor + toks.length - poem.meta[i + 1].start) : undefined;
+    if (nextToks && this.RiTa.isPunct(this.RiTa.untokenize(nextToks)[0])) {
+      if (typeof noBreakWrap === "undefined") {
+        noBreakWrap = document.createElement("span");
+        noBreakWrap.classList.add("noBreakWrap");
+      }
+      noBreakWrap.append(thisSegment);
+    } else if (typeof noBreakWrap !== "undefined") {
+      noBreakWrap.append(thisSegment);
+      resultDiv.append(noBreakWrap);
+      noBreakWrap = undefined;
+    } else {
+      resultDiv.append(thisSegment);
+    }
+
+    cursor += toks.length;
+  }
+
+  return resultDiv;
 }
 
 Annogram.lb = '<p>';
 Annogram.VERSION = '0.15'//version; import {version} from './package.json';
 
-export { Annogram };
