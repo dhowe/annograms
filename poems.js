@@ -4,7 +4,8 @@ function loadPoems() {
   let data = [].concat(
     require('./data/Penguin_Prose_Poems.json'),
     require('./data/Great_American_Prose_Poems.json'),
-    require('./data/Short_An_International_Anthology.json')
+    require('./data/Short_An_International_Anthology.json'),
+    require('./data/Anthology_of_Australian_Prose_Poetry.json'),
   ).map((p, i) => {
     let text = p.text
       .replace(/[”“()]/g, '')

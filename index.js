@@ -7,5 +7,5 @@ let poem = mm.generate(5, { minLength: 10 });
 let poemText = mm.asText(poem);
 
 console.log('\n' + poem.text + '\n\n' + poemText + '\n\n' + mm.asText(poem, true));
-console.log(mm.asLines(poem));
+//console.log(mm.asLines(poem));
 console.log(Annogram.VERSION);
