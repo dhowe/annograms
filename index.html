@@ -35,95 +35,73 @@
   </div>
   <script>
 
+    // use worker to always have the next generation ready
     let current, working, next = 0;
     let worker = new Worker('worker.js');
     let button = document.querySelector('#regen');
+    let content = document.querySelector('#content');
     let states = ['loading-first', 'loading-next-no-request', 'loading-next-with-request', 'waiting-for-click'], state = 0;
+
+    generate();
 
     worker.onmessage = function (e) {
       let { poem } = e.data;
       button.value = 'regenerate';
       if (state === 0) {
-        console.log('onMessage.STATE[0]');
         next = poem;
         showNext();
-        changeToState(1);
+        changeState(1);
         doWork();
       }
       else if (state === 1) {
-        console.log('onMessage.STATE[1]');
         next = poem;
-        changeToState(3);
+        changeState(3);
       }
       else if (state === 2) {
-        console.log('onMessage.STATE[2]');
-        // next = poem;
-        // showNext();
-        // changeToState(1);
-        // doWork();
-      }
-      else if (state === 3) {
-        console.log('onMessage.STATE[3]');
-        throw Error('invalid-state');
+        next = poem;
+        showNext();
+        changeState(1);
+        doWork();
       }
       working = false;
     };
 
     function generate() {
-      if (state) console.log('CLICK');
       if (state === 0) {
-        console.log('generate.STATE[0]');
         doWork();
       }
       else if (state === 1) {
-        console.log('generate.STATE[1], waiting on worker+user');
-        //if (wasClick)
-        changeToState(next ? 3 : 2);
+        changeState(next ? 3 : 2);
         button.value = 'loading...';
       }
-      else if (state === 2) {
-
-        // WORKING HERE, not showing when waiting...
-
-        console.log('FREEZE! generate.STATE[2] waiting on worker');
-      }
+      else if (state === 2) { /* no-op */ }
       else if (state === 3) {
-        console.log('generate.STATE[3], waiting for click');
         showNext();
-        changeToState(1);
+        changeState(1);
         doWork();
       }
     }
 
     function showNext() {
-      if (state === 0) {
-        console.log('showNext.STATE[0]');
-      }
-      else if (state === 1) {
-        console.log('showNext.STATE[1]');
-      }
-      else if (state === 2) {
-        console.log('showNext.STATE[2]');
-      }
-      document.querySelector('#content').appendChild(asHtml(next));
+      content.appendChild(asHtml(next));
       next = 0;
     }
 
-    function changeToState(i) {
+    function changeState(stateNum) {
       let pre = state;
-      state = i;
-      console.log('changeState(' + pre + '->' + i + ')', 'state[' + state + ']=' + states[state]);
+      state = stateNum;
+      // console.log('changeToState(' + pre + '->' + i + ')',
+      //   'state[' + state + ']=' + states[state]);
     }
 
     function doWork() {
       let genOpts = { minLength: 10 };
       let consOpts = { maxLengthMatch: 7, trace: 0 };
-      console.log('postMessage', 'state[' + state + ']=' + states[state], 'next:' + next);
+      // console.log('postMessage', 'state[' + state
+      //   + ']=' + states[state], 'next:' + next);
       worker.postMessage({ consOpts, genOpts, poems });
       working = true;
     }
-
-    generate();
 
   </script>
 </body>
