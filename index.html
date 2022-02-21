@@ -31,22 +31,29 @@
 <body>
   <div id="content"></div>
   <div id="ui">
-    <input id="regen" type="button" value="loading..." onclick="generate(true);" />
+    <input id="regen" type="button" value="loading..." onclick="generate()" />
+    <input type="checkbox" name="annotations" id=annotations onclick="annotations()" checked>annotations
   </div>
   <script>
 
     // use worker to always have the next generation ready
     let current, working, next = 0;
     let worker = new Worker('worker.js');
-    let button = document.querySelector('#regen');
+    let regenBut = document.querySelector('#regen');
     let content = document.querySelector('#content');
+    let annots = document.querySelector('#annotations');
     let states = ['loading-first', 'loading-next-no-request', 'loading-next-with-request', 'waiting-for-click'], state = 0;
 
     generate();
+    function annotations() {
+      console.log(annots.checked);
+      let eles = document.querySelectorAll('.source');
+      // JC: hide all annotations (and underlines) when unchecked
+    }
 
     worker.onmessage = function (e) {
-      let { poem } = e.data;
-      button.value = 'regenerate';
+      let poem = e.data;
+      regenBut.value = 'regenerate';
       if (state === 0) {
         next = poem;
         showNext();
@@ -72,7 +79,7 @@
       }
       else if (state === 1) {
         changeState(next ? 3 : 2);
-        button.value = 'loading...';
+        regenBut.value = 'loading...';
       }
       else if (state === 2) { /* no-op */ }
       else if (state === 3) {
@@ -97,8 +104,6 @@
     function doWork() {
       let genOpts = { minLength: 10 };
       let consOpts = { maxLengthMatch: 7, trace: 0 };
-      // console.log('postMessage', 'state[' + state
-      //   + ']=' + states[state], 'next:' + next);
       worker.postMessage({ consOpts, genOpts, poems });
       working = true;
     }

@@ -16,5 +16,5 @@ this.onmessage = function (e) {
     }
   }
   //console.log('post: ', poem);
-  this.postMessage({ poem });
+  this.postMessage(poem);
 };

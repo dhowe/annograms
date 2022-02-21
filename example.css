@@ -1,15 +1,15 @@
-.animatedLine{
+.animatedLine {
   white-space: pre;
   word-break: keep-all;
-  font-family: Consolas,Monaco,'Lucida Console','Liberation Mono','DejaVu Sans Mono','Bitstream Vera Sans Mono','Courier New';
+  font-family: Consolas, Monaco, 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New';
 }
 
-.asLineAnimationContainer{
+.asLineAnimationContainer {
   font-size: smaller;
   line-height: 0.8;
 }
 
-.meta{
+.meta {
   position: relative;
   display: inline-block;
 }
@@ -18,18 +18,18 @@
   display: block;
 }
 
-.display{
+.display {
   font-family: 'Times New Roman', Times, serif;
-  width:800px
+  width: 800px
 }
 
-.noBreakWrap{
+.noBreakWrap {
   word-break: keep-all;
   white-space: nowrap;
 }
 
-.source{
-  font-family:'Times New Roman', Times, serif;
+.source {
+  font-family: 'Times New Roman', Times, serif;
   line-height: normal;
   word-break: normal;
   white-space: normal;
@@ -50,11 +50,11 @@
   left: 0%;
 }
 
-.sourceHighlight{
-  background:rgb(215, 170, 200)
+.sourceHighlight {
+  background: rgb(215, 170, 200)
 }
 
-.sourceFootnote{
+.sourceFootnote {
   font-size: xx-small;
   text-align: right;
   padding-bottom: 0px;
