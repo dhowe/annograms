@@ -10,10 +10,7 @@
     a[href] {
       text-decoration: none;
       color: #3182bd;
-    }
-
-    a[href]:hover {
-      text-decoration: underline;
+      cursor: auto;
     }
 
     .display {
@@ -50,6 +47,20 @@
       eles.forEach(e => {
           e.style.display = annots.checked ? "block" : "none";
       });
+      let sty;
+      if(annots.checked) {
+        const cssStr = "a:hover {text-decoration: underline; cursor:pointer; }"
+        let undelineStyleElement = document.createElement('style');
+        undelineStyleElement.id = "add-underline"
+        if (undelineStyleElement.styleSheet) {
+          undelineStyleElement.styleSheet.cssText = cssStr;
+        } else {
+          undelineStyleElement.appendChild(document.createTextNode(cssStr));
+        }
+        document.getElementsByTagName('head')[0].appendChild(undelineStyleElement);
+      } else if (sty = document.getElementById("add-underline")) {
+        sty.remove();
+      }
     }
 
     worker.onmessage = function (e) {
