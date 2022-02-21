@@ -12,10 +12,6 @@
       color: #3182bd;
     }
 
-    a[href]:hover {
-      text-decoration: underline;
-    }
-
     .display {
       max-width: 500px;
       margin: 20px;
@@ -50,6 +46,20 @@
       eles.forEach(e => {
           e.style.display = annots.checked ? "block" : "none";
       });
+      let sty;
+      if(annots.checked) {
+        const cssStr = "a:hover {text-decoration: underline;}"
+        let undelineStyleElement = document.createElement('style');
+        undelineStyleElement.id = "add-underline"
+        if (undelineStyleElement.styleSheet) {
+          undelineStyleElement.styleSheet.cssText = cssStr;
+        } else {
+          undelineStyleElement.appendChild(document.createTextNode(cssStr));
+        }
+        document.getElementsByTagName('head')[0].appendChild(undelineStyleElement);
+      } else if (sty = document.getElementById("add-underline")) {
+        sty.remove();
+      }
     }
 
     worker.onmessage = function (e) {
