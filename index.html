@@ -46,9 +46,10 @@
 
     generate();
     function annotations() {
-      console.log(annots.checked);
       let eles = document.querySelectorAll('.source');
-      // JC: hide all annotations (and underlines) when unchecked
+      eles.forEach(e => {
+          e.style.display = annots.checked ? "block" : "none";
+      });
     }
 
     worker.onmessage = function (e) {
@@ -92,6 +93,7 @@
     function showNext() {
       content.appendChild(asHtml(next));
       next = 0;
+      annotations();
     }
 
     function changeState(stateNum) {

@@ -15,7 +15,7 @@
 }
 
 .meta:hover .source {
-  display: block;
+  visibility: visible;
 }
 
 .display {
@@ -34,7 +34,7 @@
   word-break: normal;
   white-space: normal;
   color: black;
-  display: none;
+  visibility: hidden;
   text-align: left;
   background: #D7D7D7;
   width: 350%;
