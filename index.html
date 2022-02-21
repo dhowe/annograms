@@ -10,6 +10,7 @@
     a[href] {
       text-decoration: none;
       color: #3182bd;
+      cursor: auto;
     }
 
     .display {
@@ -48,7 +49,7 @@
       });
       let sty;
       if(annots.checked) {
-        const cssStr = "a:hover {text-decoration: underline;}"
+        const cssStr = "a:hover {text-decoration: underline; cursor:pointer; }"
         let undelineStyleElement = document.createElement('style');
         undelineStyleElement.id = "add-underline"
         if (undelineStyleElement.styleSheet) {
