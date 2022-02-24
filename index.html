@@ -7,11 +7,6 @@
   <script src="annogram-html.js"></script>
   <link rel="stylesheet" href="example.css">
   <style>
-    a[href] {
-      text-decoration: none;
-      color: #3182bd;
-      cursor: auto;
-    }
 
     .display {
       max-width: 500px;
@@ -49,7 +44,7 @@
       });
       let sty;
       if(annots.checked) {
-        const cssStr = "a:hover {text-decoration: underline; cursor:pointer; }"
+        const cssStr = ".meta:hover {text-decoration: underline; cursor:pointer; }"
         let undelineStyleElement = document.createElement('style');
         undelineStyleElement.id = "add-underline"
         if (undelineStyleElement.styleSheet) {

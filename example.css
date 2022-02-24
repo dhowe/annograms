@@ -12,6 +12,8 @@
 .meta {
   position: relative;
   display: inline-block;
+  color: #3182bd;
+  cursor: auto;
 }
 
 .meta:hover .source {

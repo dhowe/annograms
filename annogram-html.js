@@ -390,9 +390,9 @@ function asHtml(poem) {
 
     let sourceDiv = createSourceDiv(nextForSourceSearch, src);
 
-    let thisSegment = document.createElement("a");
+    let thisSegment = document.createElement("span");
     thisSegment.classList.add("meta");
-    thisSegment.href = "javascript:void(0)";
+    //thisSegment.href = "javascript:void(0)";
     thisSegment.append(next);
     thisSegment.append(sourceDiv);
     //prevent lb on punctuations
