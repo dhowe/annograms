@@ -136,9 +136,9 @@ class Annogram {
 
       let sourceDiv = this._createSourceDiv(nextForSourceSearch, src);
 
-      let thisSegment = document.createElement("a");
+      let thisSegment = document.createElement("span");
       thisSegment.classList.add("meta");
-      thisSegment.href = "javascript:void(0)";
+      //thisSegment.href = "javascript:void(0)";
       thisSegment.append(next);
       thisSegment.append(sourceDiv);
       //prevent lb on punctuations
@@ -298,9 +298,9 @@ class Annogram {
       thisLineSpan.classList.add("animatedLine");
       let execArr = /^\s+/.exec(line);
       if (execArr) thisLineSpan.append(execArr[0]);
-      let textDisplay = document.createElement('a');
+      let textDisplay = document.createElement('span');
       textDisplay.classList.add("meta");
-      textDisplay.href = "javascript:void(0)";
+      // textDisplay.href = "javascript:void(0)";
       let txt = line.replace(/^\s+/, "");
 
       let sourceDiv = this._createSourceDiv(txt, src);
