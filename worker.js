@@ -1,5 +1,5 @@
 
-importScripts('node_modules/rita/dist/rita.js');
+importScripts('https://cdnjs.cloudflare.com/ajax/libs/rita/2.8.1/rita-micro.min.js');
 importScripts('annogram-html.js');
 
 let annogram;
