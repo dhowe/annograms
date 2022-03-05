@@ -2,17 +2,21 @@
 <html lang="en">
 
 <head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/rita/2.8.1/rita-micro.min.js" integrity="sha512-YxEqlNt/0u5D57uKISwHtGQ5cZ4hBsYjAEDKBaPUab0W9n1tE7Op8/FlrAJFd06mcgmuo4sELSxS3iMNx8fMRQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rita/2.8.1/rita-micro.min.js"></script>
   <script src="poems-html.js"></script>
   <script src="annogram-html.js"></script>
   <link rel="stylesheet" href="example.css">
   <style>
-
     .display {
       max-width: 500px;
       margin: 20px;
     }
-
+    .description {
+      font-family: sans-serif;
+      font-size: 15px;
+      max-width: 550px;
+      margin: 10px;
+    }
     #ui {
       margin: 20px
     }
@@ -21,6 +25,10 @@
 </head>
 
 <body>
+  <div class="description">
+    An n-gram based generator, with inputs from a corpus of prose poems, annotated with source references
+    for each phrase (mouse-over to view)
+  </div>
   <div id="content"></div>
   <div id="ui">
     <input id="regen" type="button" value="loading..." onclick="generate()" />
@@ -34,16 +42,23 @@
     let regenBut = document.querySelector('#regen');
     let content = document.querySelector('#content');
     let annots = document.querySelector('#annotations');
-    let states = ['loading-first', 'loading-next-no-request', 'loading-next-with-request', 'waiting-for-click'], state = 0;
+    let states = [
+      'loading-first',
+      'loading-next-no-request',
+      'loading-next-with-request',
+      'waiting-for-click'
+    ];
+    let state = 0;
 
     generate();
+
     function annotations() {
       let eles = document.querySelectorAll('.source');
       eles.forEach(e => {
-          e.style.display = annots.checked ? "block" : "none";
+        e.style.display = annots.checked ? "block" : "none";
       });
       let sty;
-      if(annots.checked) {
+      if (annots.checked) {
         const cssStr = ".meta:hover {text-decoration: underline; cursor:pointer; }"
         let undelineStyleElement = document.createElement('style');
         undelineStyleElement.id = "add-underline"
