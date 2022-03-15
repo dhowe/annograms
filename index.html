@@ -69,7 +69,7 @@
         }
         document.getElementsByTagName('head')[0].appendChild(undelineStyleElement);
       } else if (sty = document.getElementById("add-underline")) {
-        sty.remove();
+        while(sty = document.getElementById("add-underline")) sty.remove();
       }
     }
 
