@@ -418,6 +418,90 @@ function asHtml(poem) {
   return resultDiv;
 }
 
+function asHtmlLines(poem, lineWidth, font){
+  let cursor = 0;
+  let lines = [];
+  let noBreakWrap,noBreakWrapText="";
+  let currentLine = document.createElement("span");
+  currentLine.classList.add("scroll-line");
+  let currentLineText = "";
+  const context = document.createElement("canvas").getContext("2d");
+  context.font = font;
+  for (let i = 0; i <poem.meta.length; i++) {
+    let m = poem.meta[i];
+
+    // Note that some meta elements may have id = -1
+    // which means they shouldn't get a highlight
+    if (m.sourceId < 0) throw Error('TODO: handle sourceId == -1');
+
+    let toks = m.tokens.slice(cursor - m.start);
+    let src = poems.find(p => p.id === m.sourceId);
+    if (!src) throw Error('No source for sourceId #' + m.sourceId);
+
+    let next = this.RiTa.untokenize(toks);
+    let nextForSourceSearch = this.RiTa.untokenize(m.tokens);
+    if (i > 0 && !this.RiTa.isPunct(next[0])) {
+      currentLine.append(' ');
+      currentLineText += " ";
+    }
+    let sourceDiv = createSourceDiv(nextForSourceSearch, src);
+
+    let thisSegment = document.createElement("span");
+    thisSegment.classList.add("meta");
+    thisSegment.append(next);
+    thisSegment.append(sourceDiv);
+    //prevent lb on punctuations
+    let nextToks = i < poem.meta.length - 1 ? poem.meta[i + 1].tokens.slice
+      (cursor + toks.length - poem.meta[i + 1].start) : undefined;
+    
+    if (nextToks && this.RiTa.isPunct(this.RiTa.untokenize(nextToks)[0])) {
+      if (typeof noBreakWrap === "undefined") {
+        noBreakWrap = document.createElement("span");
+        noBreakWrap.classList.add("noBreakWrap");
+        noBreakWrapText = "";
+      }
+      noBreakWrap.append(thisSegment);
+      noBreakWrapText += next;
+    } else if (typeof noBreakWrap !== "undefined") {
+      noBreakWrap.append(thisSegment);
+      noBreakWrapText += next;
+      if (context.measureText(currentLineText + noBreakWrapText).width <= lineWidth) {
+        currentLine.append(noBreakWrap);
+        currentLineText += noBreakWrapText;
+      } else {
+        currentLine.append(document.createElement("br"));
+        currentLineText = "";
+        lines.push(currentLine);
+        currentLine = document.createElement("span");
+        currentLine.classList.add("scroll-line");
+        currentLine.append(noBreakWrap);
+        currentLineText += noBreakWrapText;
+      }
+      noBreakWrap = undefined;
+      noBreakWrapText = "";
+    } else {
+      if (context.measureText(currentLineText + next).width <= lineWidth) {
+        currentLine.append(thisSegment);
+        currentLineText += next;
+      } else {
+        currentLine.append(document.createElement("br"));
+        lines.push(currentLine);
+        currentLineText = "";
+        currentLine = document.createElement("span");
+        currentLine.classList.add("scroll-line");
+        currentLine.append(thisSegment);
+        currentLineText += next;
+      }
+    }
+ 
+    cursor += toks.length;
+  }
+
+  currentLine.append(document.createElement("br"));
+  lines.push(currentLine);
+  return lines;
+}
+
 Annogram.lb = '<p>';
 Annogram.VERSION = '0.15'//version; import {version} from './package.json';
 

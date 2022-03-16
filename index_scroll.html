@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/rita/2.8.1/rita-micro.min.js"></script>
+  <script src="poems-html.js"></script>
+  <script src="annogram-html.js"></script>
+  <link rel="stylesheet" href="example.css">
+  <style>
+    #content{
+        font-family: 'Times New Roman', Times, serif;
+        max-width: 500px;
+        max-height: 80vh;
+        margin: 20px;
+        overflow: visible;
+    }
+    .description {
+      font-family: sans-serif;
+      font-size: 15px;
+      max-width: 550px;
+      margin: 10px;
+    }
+    #ui {
+      margin: 20px
+    }
+    .scroll-line {
+      animation: fadeIn linear 0.2s;
+      -webkit-animation: fadeIn linear 0.2s;
+      -moz-animation: fadeIn linear 0.2s;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    @keyframes fadeIn {
+        0% {opacity:0;}
+        100% {opacity:1;}
+    }
+
+    @-moz-keyframes fadeIn {
+        0% {opacity:0;}
+        100% {opacity:1;}
+        }
+
+    @-webkit-keyframes fadeIn {
+        0% {opacity:0;}
+        100% {opacity:1;}
+    }
+  </style>
+  <meta charset="utf-8">
+</head>
+
+<body>
+  <div class="description">
+    An n-gram based generator, with inputs from a corpus of prose poems,
+    annotated with source references for each phrase (mouse-over to view)
+  </div>
+  <div id="content"></div>
+  <div id="ui">
+    <input id="toggleButton" type="button" value="loading..." onclick="toggleScroll()" />
+    <input type="checkbox" name="annotations" id=annotations onclick="annotations()" checked>annotations
+  </div>
+  <script>
+    let toggleButt = document.querySelector('#toggleButton');
+    let content = document.querySelector('#content');
+    let annots = document.querySelector('#annotations');
+    let scrollSpeed = 1200, interval;
+    let maxDisplayNo = calculateDisplayLines();
+    let reserveBufferNo = 4;
+    let reserveArray = [];
+    let worker = new Worker("worker.js"), working, sc;
+    let loadedFirst = false
+
+    generate();
+
+    worker.onmessage = function(e) {
+        let poem = e.data;
+        addToReserveArray(poem);
+        if (!loadedFirst) {
+            // get the first few lines
+            addNewLine();
+            if (!interval) interval = setInterval(addNewLine, scrollSpeed);
+            toggleButt.value = "stop";
+            sc = true;
+            loadedFirst = true;
+        }
+        working = false;
+    }
+
+    window.onresize = () => {
+        maxDisplayNo = calculateDisplayLines();
+        console.log(maxDisplayNo);
+        while(content.childElementCount > maxDisplayNo) content.removeChild(content.firstChild);
+    }
+    ///////////////////////////// helpers ///////////////////////////////////////
+    function addToReserveArray(poem) {
+        let computedStyle = window.getComputedStyle(content);
+        let max = computedStyle.width.replace(/px/g,"").trim();
+        max = parseFloat(max);
+        let targetfont = computedStyle.getPropertyValue("font-size") + " " + computedStyle.getPropertyValue("font-family");
+        reserveArray.push(...asHtmlLines(poem, max, targetfont));
+        /// line between poems
+        let tem = document.createElement("span");
+        tem.classList.add("scroll-line");
+        tem.classList.add("empty-line");
+        tem.append(document.createElement("br"));
+        reserveArray.push(tem);
+    }
+
+    function addNewLine() {
+        let elementToInsert = reserveArray.shift();
+        if (!elementToInsert || !elementToInsert instanceof HTMLElement) return
+        content.appendChild(elementToInsert)
+        if (content.childElementCount > maxDisplayNo) content.removeChild(content.firstChild);
+        annotations();
+        if (reserveArray.length < reserveBufferNo) {
+            generate();
+        }
+    }
+
+    function annotations() {
+      let eles = document.querySelectorAll('.source');
+      eles.forEach(e => {
+        e.style.display = annots.checked ? "block" : "none";
+      });
+      let sty;
+      if (annots.checked) {
+        const cssStr = ".meta:hover {text-decoration: underline; cursor:pointer; }"
+        let undelineStyleElement = document.createElement('style');
+        undelineStyleElement.id = "add-underline"
+        if (undelineStyleElement.styleSheet) {
+          undelineStyleElement.styleSheet.cssText = cssStr;
+        } else {
+          undelineStyleElement.appendChild(document.createTextNode(cssStr));
+        }
+        document.getElementsByTagName('head')[0].appendChild(undelineStyleElement);
+      } else if (sty = document.getElementById("add-underline")) {
+        while(sty = document.getElementById("add-underline")) sty.remove();
+      }
+    }
+
+    function calculateDisplayLines(){
+        let computedStyle = window.getComputedStyle(content)
+        let mh = computedStyle.maxHeight.replace(/px/g, "").trim();
+        mh = parseFloat(mh);
+        let lh = computedStyle.lineHeight.replace(/px/g, "").trim();
+        lh = parseFloat(lh);
+        if (isNaN(lh)) lh = parseFloat(computedStyle.fontSize.replace(/px/g, "").trim()) * 1.2;
+        return Math.floor(mh/lh);
+    }
+
+    function generate(){
+        let genOpts = { minLength: 10 };
+        let consOpts = { maxLengthMatch: 7, trace: 0 };
+        worker.postMessage({ consOpts, genOpts, poems });
+        working = true;
+    }
+
+    function toggleScroll(){
+        if (sc) {
+            sc = false;
+            toggleButt.value = "start";
+            clearInterval(interval);
+            interval = undefined;
+        } else {
+            sc = true;
+            toggleButt.value = "stop";
+            addNewLine();
+            interval = setInterval(addNewLine, scrollSpeed);
+        }
+    }
+  </script>
+</body>
