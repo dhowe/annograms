@@ -14,9 +14,10 @@
     "test": "mocha -r esm"
   },
   "devDependencies": {
+    "csv-parser": "^3.0.0",
     "esm": "^3.2.25",
-    "mocha": "8.3.0",
-    "line-reader": "^0.4.0"
+    "line-reader": "^0.4.0",
+    "mocha": "8.3.0"
   },
   "dependencies": {
     "rita": "^2.6.1"
