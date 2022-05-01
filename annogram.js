@@ -20,7 +20,7 @@ class Annogram {
     }, '');
   }
 
-  generate(num, opts = { minLength: 8, greedy: 0 }) {
+  generate(num, opts = { minLength: 8 }) {
     let poem = this.model.generate(num, opts);
     return this.annotate(poem, opts);
   }
