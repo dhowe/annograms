@@ -32,33 +32,33 @@
   <div id="content"></div>
   <div id="ui">
     <input id="regen" type="button" value="loading..." onclick="generate()" />
-    <input type="checkbox" name="annotations" id=annotations onclick="annotations()" checked>annotations
+    <input type="checkbox" name="annotations" id=annotations onclick="annotations()">annotations
   </div>
   <script>
 
     // use worker to always have the next generation ready
-    let current, working, next = 0;
+    let current, working;
+    let next = 0, state = 0;
     let worker = new Worker('worker.js');
-    let regenBut = document.querySelector('#regen');
     let content = document.querySelector('#content');
-    let annots = document.querySelector('#annotations');
+    let regenButton = document.querySelector('#regen');
+    let annoCheckbox = document.querySelector('#annotations');
     let states = [
       'loading-first',
       'loading-next-no-request',
       'loading-next-with-request',
       'waiting-for-click'
     ];
-    let state = 0;
 
     generate();
 
     function annotations() {
       let eles = document.querySelectorAll('.source');
       eles.forEach(e => {
-        e.style.display = annots.checked ? "block" : "none";
+        e.style.display = annoCheckbox.checked ? "block" : "none";
       });
       let sty;
-      if (annots.checked) {
+      if (annoCheckbox.checked) {
         const cssStr = ".meta:hover {text-decoration: underline; cursor:pointer; }"
         let undelineStyleElement = document.createElement('style');
         undelineStyleElement.id = "add-underline"
@@ -75,7 +75,7 @@
 
     worker.onmessage = function (e) {
       let poem = e.data;
-      regenBut.value = 'regenerate';
+      regenButton.value = 'regenerate';
       if (state === 0) {
         next = poem;
         showNext();
@@ -101,7 +101,7 @@
       }
       else if (state === 1) {
         changeState(next ? 3 : 2);
-        regenBut.value = 'loading...';
+        regenButton.value = 'loading...';
       }
       else if (state === 2) { /* no-op */ }
       else if (state === 3) {
