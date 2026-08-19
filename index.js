@@ -1,5 +1,5 @@
-import { Annogram } from './annogram';
-import poems from './poems';
+import { Annogram } from './annogram.js';
+import poems from './poems.js';
 import RiTa from 'rita';
 
 let mm = new Annogram(4, poems, { maxLengthMatch: 7, trace: 0, RiTa });

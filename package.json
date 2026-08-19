@@ -7,17 +7,18 @@
     "type": "git",
     "url": "https://github.com/dhowe/annograms.git"
   },
+  "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "main": "node -r esm index.js",
-    "parse": "node -r esm json-parser.js",
-    "test": "mocha -r esm"
+    "main": "node index.js",
+    "parse": "node json-parser.js",
+    "test": "mocha"
   },
   "devDependencies": {
     "csv-parser": "^3.0.0",
     "esm": "^3.2.25",
     "line-reader": "^0.4.0",
-    "mocha": "8.3.0"
+    "mocha": "^11.8.0"
   },
   "dependencies": {
     "rita": "^2.8.1"

@@ -1,12 +1,18 @@
 import RiTa from 'rita';
+import { writeFileSync } from 'fs';
+import penguinPoems from './data/Penguin_Prose_Poems.json' with { type: 'json' };
+import greatAmericanPoems from './data/Great_American_Prose_Poems.json' with { type: 'json' };
+import shortAnthology from './data/Short_An_International_Anthology.json' with { type: 'json' };
+import australianPoems from './data/Anthology_of_Australian_Prose_Poetry.json' with { type: 'json' };
+import modernPoetry from './data/Modern_Poetry.json' with { type: 'json' };
 
 function loadPoems() {
   let data = [].concat(
-    require('./data/Penguin_Prose_Poems.json'),
-    require('./data/Great_American_Prose_Poems.json'),
-    require('./data/Short_An_International_Anthology.json'),
-    require('./data/Anthology_of_Australian_Prose_Poetry.json'),
-    require('./data/Modern_Poetry.json'),
+    penguinPoems,
+    greatAmericanPoems,
+    shortAnthology,
+    australianPoems,
+    modernPoetry,
   ).map((p, i) => {
     let text = p.text
       .replace(/[”“()]/g, '')
@@ -22,7 +28,7 @@ function loadPoems() {
       words.map(w => w.startsWith('I') ? w : w.toLowerCase());
       return RiTa.capitalize(RiTa.untokenize(words));
     });
-    require('fs').writeFileSync('sentences.json', JSON.stringify(sents,0,2));
+    writeFileSync('sentences.json', JSON.stringify(sents,0,2));
     p.id = i;
     p.text = sents.join(' ');
     return p;
@@ -33,7 +39,7 @@ function loadPoems() {
 let poems = loadPoems();
 if (0) {
   let fname = "poems-html.json";
-  require('fs').writeFileSync(fname, JSON.stringify(poems));
+  writeFileSync(fname, JSON.stringify(poems));
   console.log('Wrote '+poems.length+' poems to '+fname);
 }
 export default poems;
