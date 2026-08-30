@@ -418,6 +418,6 @@ class Annogram {
 }
 
 Annogram.lb = '<p>';
-Annogram.VERSION = '0.15'//version; import {version} from './package.json';
+Annogram.VERSION = '0.16'//version; import {version} from './package.json';
 
 export { Annogram };
