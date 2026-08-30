@@ -1,21 +1,8 @@
-function _1(md) {
-  return (
-    md`# Annograms
-N-gram generation from a small corpus of prose poems, with each generated phrase annotated with the extended context where it was found.
-`
-  )
-}
+function _1(md) { return (md``) }
 
 function _2(html) {
   return (
     html`
-<div class="rc">
-<h3>&nbsp;&nbsp;&nbsp;Related Resources</h3>
-<ul>
-<li>Generating with <a href="./tut-rita-ngrams" target="new">RiTa n-grams</a></li>
-<li>The <a href="./the-rita-reference">RiTa reference</a> in observable</li>
-<li><a href="https://rednoise.org/rita" target="new">RiTa on the web</a>: examples, docs, gallery, etc.</li>
-</div>
 <style>
 .rc {
   border-radius: 25px;
@@ -25,10 +12,10 @@ function _2(html) {
   font-size: .8em;
 }
 </style>
-
 `
   )
 }
+function _3(html) { return (html`<br><hr>`) }
 
 function _genbutton(Inputs) {
   return (
@@ -44,7 +31,7 @@ function _checkbox(Inputs) {
 
 function _5(md) {
   return (
-    md`<small>_mouse-over phrases to view annotations_</small>`
+    md`<small>_Mouse-over phrases to view annotations_</small>`
   )
 }
 
@@ -89,8 +76,7 @@ function _annogram(Annogram, data, RiTa) {
 
 function _11(md) {
   return (
-    md`---
-
+    md`
 ## Appendix`
   )
 }
@@ -127,7 +113,7 @@ function _data(raw, RiTa) {
   return (
     raw.flat().map((p, i) => {
       let text = p.text
-        .replace(/[”“()]/g, '')
+        .replace(/[”“"()]/g, '')
         .replace(/((\r?\n)|<p>|[\s])+/g, ' ')
         .replace(/(^[`‘’']|[`‘’']\s|\s[`‘’'])/g, ' ')
         .replace(/[`‘’']([!?.])$/, '$1')
@@ -177,15 +163,18 @@ export default function define(runtime, observer) {
   const main = runtime.module();
   main.variable(observer()).define(["md"], _1);
   main.variable(observer()).define(["html"], _2);
-  main.variable(observer("viewof genbutton")).define("viewof genbutton", ["Inputs"], _genbutton);
-  main.variable(observer("genbutton")).define("genbutton", ["Generators", "viewof genbutton"], (G, _) => G.input(_));
-  main.variable(observer("viewof checkbox")).define("viewof checkbox", ["Inputs"], _checkbox);
-  main.variable(observer("checkbox")).define("checkbox", ["Generators", "viewof checkbox"], (G, _) => G.input(_));
+ 
   main.variable(observer()).define(["md"], _5);
   main.variable(observer()).define(["annogram", "poem"], _6);
   main.variable(observer()).define(["md"], _7);
   main.variable(observer()).define(["annogram", "poem"], _8);
   main.define("initial poem", ["genbutton", "annogram"], _poem);
+  main.variable(observer()).define(["html"], _3);
+  main.variable(observer("viewof genbutton")).define("viewof genbutton", ["Inputs"], _genbutton);
+  main.variable(observer("genbutton")).define("genbutton", ["Generators", "viewof genbutton"], (G, _) => G.input(_));
+  main.variable(observer("viewof checkbox")).define("viewof checkbox", ["Inputs"], _checkbox);
+  main.variable(observer("checkbox")).define("checkbox", ["Generators", "viewof checkbox"], (G, _) => G.input(_));
+  main.variable(observer()).define(["html"], _3);
   main.variable(observer("mutable poem")).define("mutable poem", ["Mutable", "initial poem"], (M, _) => new M(_));
   main.variable(observer("poem")).define("poem", ["mutable poem"], _ => _.generator);
   main.variable(observer("annogram")).define("annogram", ["Annogram", "data", "RiTa"], _annogram);
