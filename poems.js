@@ -15,7 +15,7 @@ function loadPoems() {
     modernPoetry,
   ).map((p, i) => {
     let text = p.text
-      .replace(/[”“()]/g, '')
+      .replace(/[”“"()]/g, '')
       .replace(/((\r?\n)|<p>|[\s])+/g, ' ')
       .replace(/(^[`‘’']|[`‘’']\s|\s[`‘’'])/g, ' ')
       .replace(/[`‘’']([!?.])$/, '$1')

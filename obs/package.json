@@ -1,0 +1,14 @@
+{
+  "name": "@dhowe/annograms",
+  "main": "8b3a2ddcb3bc611b@629.js",
+  "version": "629.0.0",
+  "homepage": "https://observablehq.com/@dhowe/annograms",
+  "author": {
+    "name": "Daniel Howe",
+    "url": "https://observablehq.com/@dhowe"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4 - 5"
+  }
+}
