@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { Annogram } from '../annogram.js';
 import poems from '../poems.js';
-import RiTa from 'rita';
+import { RiTa } from 'rita';
 
 describe('Annograms', function () {
   this.timeout(20000);

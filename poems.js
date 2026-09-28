@@ -1,4 +1,4 @@
-import RiTa from 'rita';
+import { RiTa } from 'rita';
 import { writeFileSync } from 'fs';
 import penguinPoems from './data/Penguin_Prose_Poems.json' with { type: 'json' };
 import greatAmericanPoems from './data/Great_American_Prose_Poems.json' with { type: 'json' };

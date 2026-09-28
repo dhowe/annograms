@@ -3,11 +3,10 @@ class Annogram {
   constructor(n, poems, opts = {}) {
     this.source = poems;
     this.RiTa = opts.RiTa || RiTa;
-    opts.text = poems.map(p => p.text).join(Annogram.lb);
-    //require('fs').writeFileSync('text.txt', opts.text); // tmp
+    let allSentences = poems.map(p => p.text).join(Annogram.lb);
+    opts.sentences = this.RiTa.sentences(allSentences);
     this.model = this.RiTa.markov(n, opts);
-    this.model.sentenceStarts = this.model.sentenceStarts
-      .filter(s => /^[A-Z]/.test(s));
+    // sentenceStarts filtering is handled internally by rita4
   }
 
   asText(poem, addSources) {
@@ -20,8 +19,10 @@ class Annogram {
     }, '');
   }
 
-  generate(num, opts = { minLength: 8 }) {
-    let poem = this.model.generate(num, opts);
+  generate(numSentences, opts) {
+    let poem = this.model.generate({ numSentences, minLength: opts?.minLength || 10 });
+    if (!poem || poem?.length !== numSentences) throw Error('bad poem generated: '+poem);
+    
     return this.annotate(poem, opts);
   }
 
@@ -45,7 +46,13 @@ class Annogram {
     }
 
     const appendEndMarkers = () => {
-      let meta = poem.meta, next;
+      let meta = poem.meta;
+      if (meta.length === 0) return;
+      if (meta.length === 1) {
+        meta[0].end = meta[0].start + meta[0].tokens.length - 1;
+        return;
+      }
+      let next;
       for (let i = 0; i < meta.length - 1; i++) {
         let curr = meta[i];
         next = meta[i + 1];
