@@ -1,5 +1,5 @@
-import RiTa from 'rita';
-//import RiTa from '../ritajs/dist/rita-micro';
+import {RiTa} from 'rita';
+import fs from 'fs';
 
 let datadir = './data/gen-only/';
 let files = [
@@ -18,22 +18,27 @@ if (0) { // dbug;
 function clean(s) {
   return s
     .replace(/\.+/g, '.')
-    .replace(/[”“()]/g, '')
+    .replace(/\\+\s*"/g, '')
+    .replace(/[”“"()]/g, '')
     .replace(/(^|\s)+['`‘’]+/g, '$1')
     .replace(/[`'‘’]+($|\s)+/g, '$1')
     .replace(/((\r?\n)|<p>|\s+)+/g, ' ')
     .replace(/!/g, '.')
-    .replace(/([A-Z]+)/g, '$1'.toLowerCase()); //?
+    .replace(/([A-Z]{2,})/g, (_, letters) => letters.toLowerCase());
 }
 
 function loadPoems() {
   let sentences = [], poems = [];
-  files.forEach(f => poems.push(...require(f)));
+  // Load poems from each file into a single array of sentences
+  files.forEach(f => {
+    let data = JSON.parse(fs.readFileSync(f));
+    poems.push(...data);
+  });
   poems.filter(p => p.author !== 'Walt Whitman')
     .forEach(p => {
       let sents = RiTa.sentences(clean(p.text)).map(s => {
         let words = RiTa.tokenize(s);
-        words.map(w => w.startsWith('I') ? w : w.toLowerCase());
+        words = words.map(w => w.startsWith('I') ? w : w.toLowerCase());
         return RiTa.capitalize(RiTa.untokenize(words));
       });
       sentences.push(...sents);
@@ -43,5 +48,5 @@ function loadPoems() {
 
 let sentences = loadPoems();
 let fname = './data/sentences.json';
-require('fs').writeFileSync(fname, JSON.stringify(sentences, 0, 2));
+fs.writeFileSync(fname, JSON.stringify(sentences, 0, 2));
 console.log('wrote ' + sentences.length + ' to ' + fname);

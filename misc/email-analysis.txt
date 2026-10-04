@@ -1,0 +1,30 @@
+Email Data Analysis
+===================
+
+Original Data Issues Found:
+---------------------------
+1. Entry "f.fan0320261@arts.ac.uk" has malformed email: "2763007321@qq.com" (contains newline and quotes)
+2. All entries are tab-separated with format: arts.ac.uk email <tab> personal email
+
+Formatted Comma-Separated List (for email):
+--------------------------------------------
+y.chen01202621@arts.ac.uk, 15525236964@163.com, x.chen0120263@arts.ac.uk, chenxinzhe200306@163.com, b.dow0120261@arts.ac.uk, bettinadow@btinternet.com, q.du0720211@arts.ac.uk, duqiushi2026@126.com, f.fan0320261@arts.ac.uk, 2763007321@qq.com, s.he0120263@arts.ac.uk, heshufan2609@163.com, y.jiang0120266@arts.ac.uk, 17882825452@163.com, y.jiang0120265@arts.ac.uk, jiangyan2026jy@163.com, j.jiang0120262@arts.ac.uk, jiangjingyu04@163.com, s.kazeem0520261@arts.ac.uk, saheekazeem@gmail.com, s.li0120268@arts.ac.uk, lishujin0426@163.com, r.liang0320261@arts.ac.uk, 15803820333@163.com, m.liang0520261@arts.ac.uk, 2917461167@qq.com, s.liu0120265@arts.ac.uk, 17763776979@163.com, z.liu0120262@arts.ac.uk, 18645611116@163.com, y.lu0120263@arts.ac.uk, lu01138738@163.com, y.luo0120262@arts.ac.uk, Lyx03123@outlook.com, x.ma0320261@arts.ac.uk, mxy1013_2023@qq.com, b.oyetade0820261@arts.ac.uk, bolaoyetade@gmail.com, j.pu0120261@arts.ac.uk, pujinglin2026@163.com, y.qian0320261@arts.ac.uk, qyf202510@163.com, w.qin0120261@arts.ac.uk, qinweilin2025@163.com, n.sohachevsky0120261@arts.ac.uk, hello@noam.co.uk, z.su0120261@arts.ac.uk, 1020620264@qq.com, x.sun0320261@arts.ac.uk, xintaosun@outlook.com, j.tang0120261@arts.ac.uk, 18100773680@163.com, w.tang0320261@arts.ac.uk, 13366122422@163.com, x.tu0520261@arts.ac.uk, tushelley@163.com, b.wang0120262@arts.ac.uk, bingrui1229@163.com, y.xu0120264@arts.ac.uk, YifanXuApply@163.com, y.yan0120262@arts.ac.uk, 13788983740@163.com, z.yang0120262@arts.ac.uk, 18280004196@163.com, q.yang0620261@arts.ac.uk, jkjiayi@gmail.com, x.yang0520262@arts.ac.uk, xiaoxueyxx2004@163.com, y.zhang0120247@arts.ac.uk, tachibanabunnyouo@gmail.com, h.zhang0820261@arts.ac.uk, m18013117715@163.com, y.zhou0120266@arts.ac.uk, Yiyang_m299@163.com, l.fan0120261@arts.ac.uk, l.fan0120261@arts.ac.uk, b.liu0120262@arts.ac.uk, bowenliu2026@163.com, j.tu0520261@arts.ac.uk, jingjingt26@163.com
+
+Entry Validation:
+-----------------
+Total entries: 80 email addresses (40 pairs)
+
+Valid email formats: All emails follow valid patterns
+- @ symbol present in all
+- Domain extensions: .com, .ac.uk, .co.uk, .org (none found)
+
+Issues found:
+1. f.fan0320261@arts.ac.uk - original had newline and quotes around 2763007321@qq.com (fixed above)
+2. l.fan0120261@arts.ac.uk - both emails in pair are identical (l.fan0120261@arts.ac.uk)
+
+Summary:
+--------
+- 40 student/personal email pairs
+- 1 formatting issue fixed (removed newline/quotes)
+- 1 duplicate email pair (l.fan0120261@arts.ac.uk)
+- All other emails appear properly formatted

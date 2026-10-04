@@ -367,7 +367,22 @@ describe('Annograms', function () {
     it('should match generated poem text', function () {
       let mm = annogram();
       let poem = mm.generate(5, { minLength: 10 });
-      assert.equal(mm.asText(poem), poem.text.replace('<p>', ''));
+      assert.deepEqual(
+        RiTa.tokenize(mm.asText(poem)),
+        RiTa.tokenize(poem.text.replace('<p>', ''))
+      );
+    });
+
+    it('should preserve generated sentence boundaries during annotation', function () {
+      let mm = annogram();
+      let sentences = [
+        'I will step out of the city.',
+        'My wife came in from the kitchen.'
+      ];
+      mm.model.generate = () => sentences;
+
+      let poem = mm.generate(sentences.length, { minLength: 1 });
+      assert.equal(mm.asText(poem), poem.text);
     });
   });
 

@@ -1,9 +1,11 @@
+import { RiTa } from 'rita';
+
 class Annogram {
 
   constructor(n, poems, opts = {}) {
     this.source = poems;
     this.RiTa = opts.RiTa || RiTa;
-    let allSentences = poems.map(p => p.text).join(Annogram.lb);
+    let allSentences = poems.map(p => p.text).join(' ' + Annogram.lb);
     opts.sentences = this.RiTa.sentences(allSentences);
     this.model = this.RiTa.markov(n, opts);
     // sentenceStarts filtering is handled internally by rita4
@@ -23,14 +25,18 @@ class Annogram {
     let poem = this.model.generate({ numSentences, minLength: opts?.minLength || 10 });
     if (!poem || poem?.length !== numSentences) throw Error('bad poem generated: '+poem);
     
-    return this.annotate(poem, opts);
+    return this.annotate(poem, { preserveSentenceBoundaries: true });
   }
 
-  annotate(lines) {
+  annotate(lines, { preserveSentenceBoundaries = false } = {}) {
 
     let n = this.model.n, dbug = true;
     let text = lines.join(' ');
-    let words = this.RiTa.tokenize(text);
+    let words = preserveSentenceBoundaries
+      ? lines.flatMap((line, i) => i
+        ? [Annogram.lb, ...this.RiTa.tokenize(line)]
+        : this.RiTa.tokenize(line))
+      : this.RiTa.tokenize(text);
     let tokens = words.slice(0, n);
     let poem = { lines, text, tokens: words, meta: [] };
     let src = this._lookupSource(tokens, { text, index: 0 })[0];
