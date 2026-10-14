@@ -1,4 +1,4 @@
-import {RiTa} from 'rita';
+import { RiTa } from 'rita';
 import fs from 'fs';
 
 let datadir = './data/gen-only/';
@@ -34,7 +34,7 @@ function loadPoems() {
     let data = JSON.parse(fs.readFileSync(f));
     poems.push(...data);
   });
-  poems.filter(p => p.author !== 'Walt Whitman')
+  poems.filter(p => p.author !== 'Walt Whitman' && !p.text.includes(' O ')
     .forEach(p => {
       let sents = RiTa.sentences(clean(p.text)).map(s => {
         let words = RiTa.tokenize(s);
@@ -42,7 +42,7 @@ function loadPoems() {
         return RiTa.capitalize(RiTa.untokenize(words));
       });
       sentences.push(...sents);
-    });
+    }));
   return sentences.filter(s => s.split(' ').length > 2);
 }
 

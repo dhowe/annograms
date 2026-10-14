@@ -3,12 +3,33 @@ import { RiTa } from 'rita';
 class Annogram {
 
   constructor(n, poems, opts = {}) {
-    this.source = poems;
     this.RiTa = opts.RiTa || RiTa;
-    let allSentences = poems.map(p => p.text).join(' ' + Annogram.lb);
-    opts.sentences = this.RiTa.sentences(allSentences);
-    this.model = this.RiTa.markov(n, opts);
+    // The corpus carries mojibake (U+FFFD) from a bad encoding conversion — 1435
+    // instances across 43 poems — which otherwise leaks straight into the output.
+    // Sanitize once so the model and the source matched by _lookupSource agree.
+    // Pass {sanitize:false} to keep the raw text.
+    const { sanitize = true, ...modelOpts } = opts;
+    // rita4 defaults temp to 1, which runs raw n-gram COUNTS through softmax as if
+    // they were logits — exp(count) — so a token seen 5x gets ~148x the weight of
+    // one seen once instead of 5x. That superlinear bias collapses generation onto
+    // a few attractor sentences and amplifies rare mojibake tokens. temp 0 selects
+    // plain count normalization, which is what rita 2.8.1 uses. Override via opts.
+    modelOpts.temp ??= 0;
+    const clean = sanitize === false ? poems : poems.map(p => Annogram.sanitize(p));
+    this.source = clean;
+    this.model = this.RiTa.markov(n, modelOpts);
+    // Split each poem separately so every sentence is a substring of exactly one poem.text.
+    // Joining with Annogram.lb first let the literal "<p>" leak into the sentence list,
+    // producing ~806 sentences that match no source and crash annotate()/_lookupSource.
+    let sentences = clean.flatMap(p => this.RiTa.sentences(p.text));
+    this.model.addSentences(sentences);
     // sentenceStarts filtering is handled internally by rita4
+  }
+
+  // Replace runs of the Unicode replacement char (U+FFFD) with a single space,
+  // then collapse any doubled spaces the removal may have created.
+  static sanitize(poem) {
+    return { ...poem, text: poem.text.replace(/\uFFFD+/g, ' ').replace(/  +/g, ' ') };
   }
 
   asText(poem, addSources) {
@@ -72,9 +93,16 @@ class Annogram {
       if (words[i] === Annogram.lb) {
         if (tokens.length) addMeta(i);
         words.splice(i, 1); // delete LB instead of jumping over to calculate "start" correctly
-        tokens = words.slice(i, i + n);
+        // Seed the window from the start of the new sentence, but stop at the next
+        // boundary. A sentence shorter than n would otherwise pull the literal "<p>"
+        // (or the following sentence) into the phrase we match against the source,
+        // which can never match and crashes _lookupSource.
+        let end = i;
+        while (end < words.length && end - i < n && words[end] !== Annogram.lb) end++;
+        tokens = words.slice(i, end);
         src = this._lookupSource(tokens, { text, index: i })[0];
-        i += n;
+        i = end - 1; // the loop's i++ lands on the first token not yet in the window
+        continue;
       }
 
       tokens.push(words[i]);
@@ -340,8 +368,14 @@ class Annogram {
       return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); 
     }
     let phrase = this.RiTa.untokenize(tokens);
+    // Only require a word boundary on the edges when the phrase actually starts/
+    // ends with a word char. A phrase ending in punctuation (e.g. "came from—")
+    // is legitimately followed by a word char in the source ("from—in"), so
+    // appending "(\\W|$)" there would reject a real match. This mirrors the
+    // convention already used by _createSourceDiv.
     let rePre = this.RiTa.isPunct(phrase[0]) ? '' : '(^|\\W)';
-    let phraseRE = new RegExp(rePre + escapeForRegex(phrase) + '(\\W|$)');
+    let rePost = this.RiTa.isPunct(phrase[phrase.length - 1]) ? '' : '(\\W|$)';
+    let phraseRE = new RegExp(rePre + escapeForRegex(phrase) + rePost);
     let srcs = this.source.filter(p => phraseRE.test(p.text));
     if (!srcs || !srcs.length) throw Error("(" + dbugInfo.index
       + ") No source for \"" + phrase + "\"\nin\n" + dbugInfo.text);
